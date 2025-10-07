@@ -1,0 +1,3194 @@
+
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComparaPrecios - La forma más inteligente de ahorrar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+    /* Definir la fuente Neue Metana Mono */
+    @font-face {
+      font-family: 'Neue Metana Mono';
+      src: url('fonts/NeueMetanaMono-Regular.woff2') format('woff2'),
+           url('fonts/NeueMetanaMono-Regular.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    /* Estilos existentes */
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .animate-fade-in-out {
+      animation: fadeInOut 3s ease-in-out;
+    }
+    @keyframes fadeInOut {
+      0% { opacity: 0; transform: translateY(-10px); }
+      10% { opacity: 1; transform: translateY(0); }
+      90% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-10px); }
+    }
+    .group:hover .group-hover\:animate-bounce {
+      animation: bounce 1s ease infinite;
+    }
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-5px); }
+      60% { transform: translateY(-3px); }
+    }
+    .product-card:hover {
+      transform: translateY(-5px);
+    }
+    .product-card img:hover {
+      transform: scale(1.05);
+    }
+    .price-bar {
+      height: 4px;
+      background-color: #10b981;
+      border-radius: 2px;
+      transition: width 0.3s ease;
+    }
+
+    /* Estilo para el h1 */
+    .title {
+      font-family: 'Neue Metana Mono', serif; /* Usar Neue Metana Mono con fallback a serif */
+    }
+  </style>
+<!-- Injected: Chart.js + Tailwind safe-check (in case original doesn't have) -->
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  /* Injected UI cosmetics for avatar and chart modal */
+  .cp-avatar { width:40px;height:40px;border-radius:9999px;background:linear-gradient(135deg,#7c3aed,#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-family:Inter, sans-serif; }
+  .cp-toast { position: fixed; right: 20px; bottom: 20px; background: rgba(0,0,0,0.8); color: #fff; padding: 10px 14px; border-radius: 8px; z-index: 9999; display:none; }
+  .cp-chart-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9998; padding: 20px; }
+  .cp-chart-card { width: min(1000px, 98%); max-height: 90vh; overflow:auto; background:#fff; border-radius:12px; padding:16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+</style>
+<style>
+/* --- CARD STYLES INJECTED --- */
+.card-base {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 1.5rem;
+  text-align: center;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+.card-base:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  background-color: #faf5ff;
+}
+.card-icon {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto 0.5rem auto;
+  color: #7c3aed;
+}
+.card-text {
+  font-weight: 600;
+  color: #1f2937;
+}
+/* --- end card styles --- */
+</style>
+</head>
+<body class="bg-gradient-to-br from-purple-800 via-purple-700 to-purple-900 min-h-screen">
+    <!-- Notification Container -->
+    <div id="notification" class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg z-50 hidden">
+        <span id="notification-message"></span>
+    </div>
+    <!-- Main App Container -->
+    <div id="app" class="min-h-screen">
+        <!-- Landing Page -->
+        
+        <div id="landing-page" class="min-h-screen bg-gradient-to-br from-purple-800 via-purple-700 to-purple-900 flex flex-col items-center justify-center p-4 text-center">
+            <h1 class="title text-white text-6xl md:text-7xl font-bold mb-6 tracking-tight">PRICEZAPP</h1>
+            <p class="text-white text-2xl md:text-3xl mb-10 font-medium">La forma más inteligente de ahorrar en tus compras</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="showRegisterPage()" class="bg-white text-purple-700 px-10 py-4 rounded-xl font-semibold text-xl hover:bg-purple-100 transition duration-300 transform hover:scale-105 shadow-lg flex items-center gap-2">
+                    <i data-lucide="rocket"></i> Registrarse Gratis
+                </button>
+                <button onclick="showLoginPage()" class="bg-green-500 text-white px-10 py-4 rounded-xl font-semibold text-xl hover:bg-green-600 transition duration-300 transform hover:scale-105 shadow-lg flex items-center gap-2">
+                    <i data-lucide="user"></i> Iniciar Sesión
+                </button>
+            </div>
+        </div>
+
+        <!-- Register Page -->
+        <div id="register-page" class="hidden min-h-screen bg-gradient-to-br from-purple-800 via-purple-700 to-purple-900 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+        <h2 class="text-4xl font-bold text-purple-700 mb-6 text-center flex items-center justify-center gap-2">
+          <i data-lucide="user-plus"></i> Crear cuenta
+        </h2>
+        <form onsubmit="handleRegister(event)" class="space-y-6">
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
+                  <i data-lucide="user"></i> Nombre completo
+                </label>
+                <input type="text" name="name" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
+                  <i data-lucide="mail"></i> Email
+                </label>
+                <input type="email" name="email" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
+                  <i data-lucide="lock"></i> Contraseña
+                </label>
+                <input type="password" name="password" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm" required>
+            </div>
+            <button type="submit" class="w-full bg-purple-700 text-white py-4 rounded-xl font-semibold hover:bg-purple-800 transition duration-300 transform hover:scale-105 shadow-md flex items-center justify-center gap-2">
+                <i data-lucide="rocket"></i> Registrarse
+            </button>
+            <p class="mt-6 text-center text-gray-600">
+                ¿Ya tienes cuenta? 
+                <button type="button" onclick="showLoginPage()" class="text-purple-700 font-semibold ml-1 hover:underline">
+                    Iniciar sesión
+                </button>
+            </p>
+        </form>
+    </div>
+</div>
+
+
+        <!-- Login Page -->
+        <div id="login-page" class="hidden min-h-screen bg-gradient-to-br from-purple-800 via-purple-700 to-purple-900 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 w-full max-w-md shadow-2xl">
+        <h2 class="text-4xl font-bold text-purple-700 mb-6 text-center flex items-center justify-center gap-2">
+          <i data-lucide="log-in"></i> Iniciar Sesión
+        </h2>
+        <form onsubmit="handleLogin(event)" class="space-y-6">
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
+                  <i data-lucide="mail"></i> Email
+                </label>
+                <input type="email" name="email" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm" required>
+            </div>
+            <div>
+                <label class="block text-gray-700 font-semibold mb-2 flex items-center gap-2">
+                  <i data-lucide="lock"></i> Contraseña
+                </label>
+                <input type="password" name="password" class="w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm" required>
+            </div>
+            <button type="submit" class="w-full bg-purple-700 text-white py-4 rounded-xl font-semibold hover:bg-purple-800 transition duration-300 transform hover:scale-105 shadow-md flex items-center justify-center gap-2">
+                <i data-lucide="arrow-right-circle"></i> Iniciar Sesión
+            </button>
+            <p class="mt-6 text-center text-gray-600">
+                ¿No tienes cuenta? 
+                <button type="button" onclick="showRegisterPage()" class="text-purple-700 font-semibold ml-1 hover:underline">
+                    Registrarse
+                </button>
+            </p>
+        </form>
+    </div>
+</div>
+
+        <!-- Categories Page -->
+        <div id="categories-page" class="hidden min-h-screen bg-purple-700">
+            
+            <header class="bg-purple-700 shadow-lg sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                    <h1 class="title text-2xl font-bold text-green-500">PRICEZAPP</h1>
+                    <div class="flex items-center gap-4 text-white">
+                        <button onclick="showShoppingListsPage()" class="p-2 hover:bg-purple-600 rounded-lg">
+                          <i data-lucide="list"></i>
+                        </button>
+                        <button onclick="showFavoritesPage()" class="p-2 hover:bg-purple-600 rounded-lg">
+                          <i data-lucide="heart"></i>
+                        </button>
+                        <button onclick="toggleAlertsPanel()" class="p-2 relative hover:bg-purple-600 rounded-lg">
+                          <i data-lucide="bell"></i>
+                          <span id="alerts-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">0</span>
+                        </button>
+                        <button onclick="showCartPage()" class="p-2 hover:bg-purple-600 rounded-lg">
+                          <i data-lucide="shopping-cart"></i>
+                        </button>
+                        <button onclick="logout()" class="bg-white text-purple-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition">
+                          Cerrar sesión
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Panel de Alertas -->
+<div id="cp-alerts-panel" class="hidden fixed right-4 top-20 w-80 max-h-[70vh] overflow-auto bg-white border rounded-lg shadow-lg z-50">
+    <h3 class="text-lg font-bold px-4 py-2 border-b">Alertas de Precio</h3>
+    <div id="cp-alerts-list" class="p-4 space-y-2 text-sm text-gray-700">
+        <!-- Aquí se renderizan las alertas con JS -->
+    </div>
+    <div class="flex gap-2 border-t p-2">
+        <button onclick="openAlertsPage()" class="flex-1 bg-purple-700 text-white py-2 rounded-lg">Ver todas</button>
+        <button onclick="clearAllAlerts()" class="bg-red-500 text-white py-2 px-4 rounded-lg">Limpiar</button>
+    </div>
+</div>
+            <div class="max-w-7xl mx-auto px-4 py-8">
+                <!-- Global Search Bar -->
+                <div class="mb-8">
+                    <input 
+                        type="text" 
+                        placeholder="Buscar productos en todas las categorías..." 
+                        id="global-search" 
+                        class="w-full max-w-2xl px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 shadow-sm"
+                    >
+                </div>
+                <h2 class="text-3xl font-bold text-gray-50 mb-8 text-center">Categorías Principales</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6" id="main-categories-container">
+                    <!-- Categories will be populated by JavaScript -->
+                </div>
+
+            <!-- Productos Destacados (insertado automáticamente) -->
+            <section id="featured-products-section" class="max-w-7xl mx-auto px-4 py-10">
+                <h2 class="text-3xl font-bold text-white text-center mb-6">Productos Destacados</h2>
+                <div id="featured-products-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                    <!-- Los productos destacados se renderizan por JavaScript (máx 5 productos) -->
+                </div>
+            </section>
+            <!-- /Productos Destacados -->
+
+
+            </div>
+        </div>
+        <!-- Subcategories Page -->
+        <div id="subcategories-page" class="hidden min-h-screen bg-purple-700">
+            <header class="bg-white shadow-lg sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                    <button onclick="showCategoriesPage()" class="text-gray-600">
+                        ← Volver
+                    </button>
+                    <h1 class="text-2xl font-bold text-purple-700" id="subcategory-title">Subcategorías de </h1>
+                </div>
+            </header>
+            <div class="max-w-7xl mx-auto px-4 py-8">
+                <h2 class="text-3xl font-bold text-gray-50 mb-8 text-center">Selecciona una subcategoría</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6" id="subcategories-container">
+                    <!-- Subcategories will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        <!-- Sub-subcategories Page -->
+        <div id="subsubcategories-page" class="hidden min-h-screen bg-purple-700">
+            <header class="bg-white shadow-lg sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                    <button onclick="showSubcategoriesPage()" class="text-gray-600">
+                        ← Volver
+                    </button>
+                    <h1 class="text-2xl font-bold text-purple-700" id="subsubcategory-title">Sub-subcategorías de </h1>
+                </div>
+            </header>
+            <div class="max-w-7xl mx-auto px-4 py-8">
+                <h2 class="text-3xl font-bold text-gray-50 mb-8 text-center">Selecciona una sub-subcategoría</h2>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6" id="subsubcategories-container">
+                    <!-- Sub-subcategories will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        <!-- Products Page -->
+        <div id="products-page" class="hidden min-h-screen bg-gray-50">
+            <header class="bg-white shadow-lg sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                    <button onclick="showSubsubcategoriesPage()" class="text-gray-600">
+                        ← Volver
+                    </button>
+                    <h1 class="text-2xl font-bold text-purple-700" id="products-title">Productos en </h1>
+                </div>
+            </header>
+            <div class="max-w-7xl mx-auto px-4 py-8">
+                <div class="mb-8">
+                    <input type="text" placeholder="Buscar productos..." id="search-input" class="w-full max-w-md px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+                
+<!-- FILTERS & SORT PANEL (INJECTED) -->
+<div id="filters-panel" class="p-4 bg-gray-100 border rounded mb-4 mx-4">
+  <div class="flex flex-wrap gap-4 items-end">
+    <div>
+      <label class="block text-sm">Precio mínimo</label>
+      <input type="number" id="min-price" class="border rounded px-2 py-1 w-28" placeholder="0">
+    </div>
+    <div>
+      <label class="block text-sm">Precio máximo</label>
+      <input type="number" id="max-price" class="border rounded px-2 py-1 w-28" placeholder="∞">
+    </div>
+    <div>
+      <label class="block text-sm">Supermercado</label>
+      <select id="filter-supermarket" class="border rounded px-2 py-1">
+        <option value="">Todos</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm">Marca</label>
+      <input type="text" id="filter-brand" class="border rounded px-2 py-1" placeholder="ej: Gallo">
+    </div>
+    <div>
+      <label class="block text-sm">Calificación mínima</label>
+      <select id="filter-rating" class="border rounded px-2 py-1">
+        <option value="">Todas</option>
+        <option value="4">4 ★ o más</option>
+        <option value="3">3 ★ o más</option>
+        <option value="2">2 ★ o más</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm">Ordenar por</label>
+      <select id="sort-by" class="border rounded px-2 py-1">
+        <option value="priceLow">Precio más bajo</option>
+        <option value="savings">Mayor ahorro</option>
+        <option value="rating">Mejor calificación</option>
+        <option value="recent">Más reciente</option>
+      </select>
+    </div>
+    <div class="ml-2">
+      <button id="apply-filters-btn" class="px-4 py-1 bg-blue-500 text-white rounded">Aplicar</button>
+      <button id="reset-filters-btn" class="ml-2 px-4 py-1 bg-gray-300 rounded">Limpiar</button>
+    </div>
+  </div>
+</div>
+<!-- END FILTERS & SORT PANEL (INJECTED) -->
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6" id="products-container">
+                    <!-- Products will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        <!-- Prices Page -->
+        <div id="prices-page" class="hidden min-h-screen bg-gray-50">
+            <header class="bg-white shadow-lg sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                    <button onclick="showProductsPage()" class="text-gray-600">
+                        ← Volver
+                    </button>
+                    <h1 class="text-2xl font-bold text-purple-700" id="product-name-title">Precios de </h1>
+                    <div class="flex items-center gap-2">
+                        <button id="favorite-toggle" class="p-2">
+                            🤍
+                        </button>
+                    </div>
+                </div>
+            </header>
+            <div class="max-w-4xl mx-auto px-4 py-8">
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6" id="product-details">
+                    <!-- Product details will be populated by JavaScript -->
+                </div>
+                <div id="prices-container" class="space-y-4">
+                    <!-- Prices will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        <!-- Cart Page -->
+        <div id="cart-page" class="hidden min-h-screen bg-gray-50">
+            <header class="bg-white shadow-lg sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                    <button onclick="showCategoriesPage()" class="text-gray-600">
+                        ← Volver a comprar
+                    </button>
+                    <h1 class="text-2xl font-bold text-purple-700">Tu Carrito</h1>
+                </div>
+            </header>
+            <div class="max-w-4xl mx-auto px-4 py-8" id="cart-content">
+                <!-- Cart content will be populated by JavaScript -->
+            </div>
+        </div>
+        <!-- Favorites Page -->
+        <div id="favorites-page" class="hidden min-h-screen bg-gray-50">
+            <header class="bg-white shadow-lg sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                    <button onclick="showCategoriesPage()" class="text-gray-600">
+                        ← Volver
+                    </button>
+                    <h1 class="text-2xl font-bold text-purple-700">Favoritos</h1>
+                </div>
+            </header>
+            <div class="max-w-7xl mx-auto px-4 py-8" id="favorites-content">
+                <!-- Favorites content will be populated by JavaScript -->
+            </div>
+        </div>
+        <!-- Shopping Lists Page -->
+        <div id="shopping-lists-page" class="hidden min-h-screen bg-gray-50">
+            <header class="bg-white shadow-lg sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                    <button onclick="showCategoriesPage()" class="text-gray-600">
+                        ← Volver
+                    </button>
+                    <h1 class="text-2xl font-bold text-purple-700">Mis Listas de Compras</h1>
+                    <button onclick="createNewShoppingList()" class="bg-green-500 text-white px-4 py-2 rounded-lg">
+                        + Nueva Lista
+                    </button>
+                </div>
+            </header>
+            <div class="max-w-4xl mx-auto px-4 py-8" id="shopping-lists-content">
+                <!-- Shopping lists will be populated by JavaScript -->
+            </div>
+        </div>
+        <!-- Shopping List Detail Page -->
+        <div id="shopping-list-detail-page" class="hidden min-h-screen bg-gray-50">
+            <header class="bg-white shadow-lg sticky top-0 z-40">
+                <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+                    <button onclick="showShoppingListsPage()" class="text-gray-600">
+                        ← Volver
+                    </button>
+                    <h1 class="text-2xl font-bold text-purple-700" id="list-detail-title">Lista de Compras</h1>
+                    <button onclick="showCategoriesPage()" class="bg-purple-700 text-white px-4 py-2 rounded-lg">
+                        Agregar Productos
+                    </button>
+                </div>
+            </header>
+            <div class="max-w-4xl mx-auto px-4 py-8" id="shopping-list-detail-content">
+                <!-- Shopping list detail will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+<!-- Alerts Page -->
+<div id="alerts-page" class="hidden min-h-screen bg-gray-50">
+  <header class="bg-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <button onclick="showCategoriesPage()" class="text-gray-600">
+        ← Volver
+      </button>
+      <h1 class="text-2xl font-bold text-purple-700">Alertas</h1>
+    </div>
+  </header>
+  <div class="max-w-7xl mx-auto px-4 py-8" id="alerts-content">
+    <!-- Alerts content will be populated by JavaScript -->
+  </div>
+</div>
+    <!-- Modal para seleccionar o crear lista -->
+    <div id="select-list-modal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+            <h2 class="text-xl font-bold text-purple-700 mb-4">Selecciona o crea una lista</h2>
+            <!-- Seleccionar lista existente -->
+            <label class="block text-gray-700 mb-2">Tus listas:</label>
+            <select id="existing-lists" class="w-full mb-4 px-4 py-2 border rounded-lg">
+                <option value="">-- Selecciona una lista --</option>
+            </select>
+            <!-- Crear nueva lista -->
+            <label class="block text-gray-700 mb-2">Nueva lista:</label>
+            <div class="flex gap-2 mb-4">
+                <input type="text" id="new-list-name" placeholder="Nombre de la lista" class="flex-1 px-4 py-2 border rounded-lg">
+                <button onclick="createListFromModal()" class="bg-green-500 text-white px-4 py-2 rounded-lg">Crear</button>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeListModal()" class="px-4 py-2 rounded-lg border">Cancelar</button>
+                <button onclick="confirmListSelection()" class="bg-purple-700 text-white px-4 py-2 rounded-lg">Aceptar</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // State management
+        let state = {
+            currentPage: 'landing',
+            selectedCategory: {
+                main: '',
+                sub: '',
+                subsub: ''
+            },
+            selectedProduct: null,
+            shoppingCart: [],
+            favorites: [],
+            searchQuery: '',
+            isLoggedIn: false,
+            user: null,
+            priceAlerts: [],
+            shoppingLists: [],
+            currentListId: null
+        };
+        // Category structure (Lucide migrado completo)
+const categories = {
+  main: [
+    { id: 1, name: 'Almacén', icon: 'package', color: 'text-purple-700' },
+    { id: 2, name: 'Carnes', icon: 'beef', color: 'text-purple-700' },
+    { id: 3, name: 'Limpieza', icon: 'sparkles', color: 'text-purple-700' },
+    { id: 4, name: 'Aderezos', icon: 'salad', color: 'text-purple-700' },
+    { id: 5, name: 'Lácteos', icon: 'milk', color: 'text-purple-700' },
+    { id: 6, name: 'Bebidas', icon: 'cup-soda', color: 'text-purple-700' },
+    { id: 7, name: 'Frutas y Verduras', icon: 'apple', color: 'text-purple-700' },
+    { id: 8, name: 'Panadería', icon: 'bread-slice', color: 'text-purple-700' },
+    { id: 9, name: 'Snacks', icon: 'popcorn', color: 'text-purple-700' },
+    { id: 10, name: 'Pescados y Mariscos', icon: 'fish', color: 'text-purple-700' },
+    { id: 11, name: 'Pollo', icon: 'drumstick', color: 'text-purple-700' },
+    { id: 12, name: 'Tecnología y Electrodomésticos', icon: 'tv', color: 'text-purple-700' },
+    { id: 12, name: 'Cereales', icon: 'bean', color: 'text-purple-700' }
+
+  ],
+  sub: {
+    'Almacén': [
+      { id: 1, name: 'Arroz', icon: 'circle-dot', color: 'text-purple-600' },
+      { id: 2, name: 'Pastas', icon: 'utensils', color: 'text-purple-600' },
+      { id: 3, name: 'Aceites', icon: 'bottle', color: 'text-purple-600' },
+      { id: 4, name: 'Vinagres', icon: 'flask-conical', color: 'text-purple-600' },
+      { id: 5, name: 'Harinas', icon: 'sandwich', color: 'text-purple-600' },
+      { id: 6, name: 'Café', icon: 'coffee', color: 'text-purple-600' },
+      { id: 7, name: 'Azúcar', icon: 'candy', color: 'text-purple-600' },
+      { id: 8, name: 'Sal', icon: 'salt', color: 'text-purple-600' },
+      { id: 9, name: 'Granos', icon: 'bean', color: 'text-purple-600' },
+      { id: 10, name: 'Condimentos y Especias', icon: 'sprout', color: 'text-purple-600' }
+    ],
+    'Carnes': [
+      { id: 11, name: 'Carnes de Res', icon: 'beef', color: 'text-purple-600' },
+      { id: 12, name: 'Carnes de Cerdo', icon: 'piggy-bank', color: 'text-purple-600' },
+      { id: 13, name: 'Carnes Frias y Embutidos', icon: 'sandwich', color: 'text-purple-600' }
+    ],
+    'Bebidas': [
+      { id: 16, name: 'Gaseosas', icon: 'cup-soda', color: 'text-purple-600' },
+      { id: 17, name: 'Aguas', icon: 'droplets', color: 'text-purple-600' },
+      { id: 18, name: 'Jugos', icon: 'cup-soda', color: 'text-purple-600' },
+      { id: 19, name: 'Cervezas', icon: 'beer', color: 'text-purple-600' },
+      { id: 20, name: 'Vinos', icon: 'wine', color: 'text-purple-600' },
+      { id: 21, name: 'Licores', icon: 'glass', color: 'text-purple-600' }
+    ]
+  },
+  subsub: {
+    'Arroz': [
+      { id: 101, name: 'Arroz Blanco', icon: 'circle-dot', color: 'text-purple-500' },
+      { id: 102, name: 'Arroz Especiales', icon: 'leaf', color: 'text-purple-500' },
+      { id: 103, name: 'Arroz Integral', icon: 'circle', color: 'text-purple-500' }
+    ],
+    'Pastas': [
+      { id: 111, name: 'Espaghettis', icon: 'utensils', color: 'text-purple-500' },
+      { id: 112, name: 'Fideos Cortos', icon: 'utensils', color: 'text-purple-500' },
+      { id: 113, name: 'Pastas Rellenas', icon: 'utensils', color: 'text-purple-500' }
+    ]
+  }
+};
+        // Supermarket logos
+        const supermarketLogos = {
+            'Olimpica': 'https://github.com/Oppita/Imagenes-Compara-precios/blob/main/logo%20Olimpica.png?raw=true',
+            'Carulla': 'https://github.com/Oppita/Imagenes-Compara-precios/blob/main/logo%20carulla.jpg?raw=true',
+            'Jumbo': 'https://github.com/Oppita/Imagenes-Compara-precios/blob/main/logo%20jumbo.png?raw=true',
+            'Zapatoca': 'https://github.com/Oppita/Imagenes-Compara-precios/blob/main/logo%20Zapatoca.png?raw=true',
+            'D1': 'https://github.com/Oppita/Imagenes-Compara-precios/blob/main/Logo%20d1.png?raw=true',
+            'Éxito': 'https://github.com/Oppita/Imagenes-Compara-precios/blob/main/Logo%20exito.png?raw=true',
+            'HiperMarFish': 'https://images.rappi.com/marketplace/hipermar_fish_1611073131820.jpg?d=70x70&e=webp&q=50',
+            'La Fazenda': 'https://images.rappi.com/marketplace/Fazenda_1611280099718.jpg'
+        };
+        // Products data with specific supermarket prices
+        const products = {
+            // Arroz products
+            'Arroz Blanco': [
+                     { 
+                    id: 2001, 
+                    name: 'Arroz CARULLA blanco (5000 gr)', 
+                    image: 'https://github.com/Oppita/Imagenes-Compara-precios/blob/main/Arroz%20CARULLA%20blanco%20(5000%20gr).webp?raw=true',
+                    category: 'Almacén', 
+                    subcategory: 'Arroz', 
+                    subsubcategory: 'Arroz Blanco', 
+                    description: 'Grano largo, ideal para guarniciones y platos principales.',
+                    rating: 4.7,
+                    brand: 'Gallo',
+                  supermarkets: [
+                        { name: 'Carulla', price: 289.90, previousPrice: 300.00, rating: 4.3, delivery: 'Gratis +${renderPrice(200)}0' },
+                        { name: 'Olimpica', price: 285.00, previousPrice: 295.00, rating: 4.5, delivery: 'Gratis +${renderPrice(150)}0' },
+                        { name: 'Jumbo', price: 292.50, previousPrice: 305.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' }
+                    ]
+                },   
+            ],
+            // Arroz products
+            'Arroz Integral': [ 
+{ 
+                    id: 2500, 
+                    name: 'Café CAFE QUINDIO gourmet tostado y molido (454 gr)', 
+                    image: 'https://github.com/Oppita/Precios-Caf-/blob/main/Caf%C3%A9%20CAFE%20QUINDIO%20gourmet%20tostado%20y%20molido%20(454%20gr).webp?raw=true',
+                    category: 'Almacén', 
+                    subcategory: 'Café', 
+                    subsubcategory: 'Café Molido', 
+                    description: 'Café molido suave, ideal para cafeteras de filtro y espresso.',
+                    rating: 4.8,
+                    brand: 'La Virginia',
+                    supermarkets: [
+                        { name: 'Carulla', price: 289.90, previousPrice: 300.00, rating: 4.3, delivery: 'Gratis +${renderPrice(200)}0' },
+                        { name: 'Olimpica', price: 285.00, previousPrice: 295.00, rating: 4.5, delivery: 'Gratis +${renderPrice(150)}0' },
+                        { name: 'Jumbo', price: 292.50, previousPrice: 305.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' }
+                    ]
+                },
+             ],
+            // Café products
+            'Café Molido': [
+                { 
+                    id: 3000, 
+                    name: 'Café CAFE QUINDIO gourmet tostado y molido (454 gr)', 
+                    image: 'https://github.com/Oppita/Precios-Caf-/blob/main/Caf%C3%A9%20CAFE%20QUINDIO%20gourmet%20tostado%20y%20molido%20(454%20gr).webp?raw=true',
+                    category: 'Almacén', 
+                    subcategory: 'Café', 
+                    subsubcategory: 'Café Molido', 
+                    description: 'Café molido suave, ideal para cafeteras de filtro y espresso.',
+                    rating: 4.8,
+                    brand: 'La Virginia',
+                    supermarkets: [
+                        { name: 'Carulla', price: 289.90, previousPrice: 300.00, rating: 4.3, delivery: 'Gratis +${renderPrice(200)}0' },
+                        { name: 'Olimpica', price: 285.00, previousPrice: 295.00, rating: 4.5, delivery: 'Gratis +${renderPrice(150)}0' },
+                        { name: 'Jumbo', price: 292.50, previousPrice: 305.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' }
+                    ]
+                },
+            ],
+            // Azúcar products
+            'Azúcar Blanca': [
+                { 
+                    id: 2001, 
+                    name: 'Azúcar MAYAGUEZ blanca (1000 gr)', 
+                    image: 'https://github.com/Oppita/Precios-Az-car-/blob/main/Az%C3%BAcar%20MAYAGUEZ%20blanca%20(1000%20gr).webp?raw=true',
+                    category: 'Almacén', 
+                    subcategory: 'Azúcar', 
+                    subsubcategory: 'Azúcar Blanca', 
+                    description: 'Azúcar blanca refinada, ideal para endulzar bebidas y repostería.',
+                    rating: 4.6,
+                    brand: 'Ledesma',
+                    supermarkets: [
+                        { name: 'D1', price: 4560.00, previousPrice: 4700.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        { name: 'Zapatoca', price: 4600.00, previousPrice: 4750.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        { name: 'Éxito', price: 4500.00, previousPrice: 4650.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' }
+                    ]
+                },
+            ],
+            // Sal products
+            'Sal Marina': [
+                { 
+                    id: 2004, 
+                    name: 'Sal Marina Dos Anclas 1kg', 
+                    image: 'https://placehold.co/300x400/8b5cf6/ffffff?text=Sal+Marina',
+                    category: 'Almacén', 
+                    subcategory: 'Sal', 
+                    subsubcategory: 'Sal Marina', 
+                    description: 'Sal marina natural, sin aditivos, ideal para sazonar todo tipo de platos.',
+                    rating: 4.7,
+                    brand: 'Dos Anclas',
+                    supermarkets: [
+                        { name: 'Carulla', price: 79.90, previousPrice: 85.00, rating: 4.3, delivery: 'Gratis +${renderPrice(200)}0' },
+                        { name: 'Olimpica', price: 78.50, previousPrice: 83.00, rating: 4.5, delivery: 'Gratis +${renderPrice(150)}0' },
+                        { name: 'Jumbo', price: 81.00, previousPrice: 86.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' }
+                    ]
+                }
+            ],
+            // Aceites de Oliva products
+            'Aceites de Oliva': [
+                { 
+                    id: 1001, 
+                    name: 'Aceite de Oliva Extra Virgen 500ml', 
+                    image: 'https://placehold.co/300x400/8b5cf6/ffffff?text=Aceite+Oliva',
+                    category: 'Almacén', 
+                    subcategory: 'Aceites', 
+                    subsubcategory: 'Aceites de Oliva', 
+                    description: 'De primera presión en frío, ideal para ensaladas.',
+                    rating: 4.8,
+                    brand: 'La Española',
+                    supermarkets: [
+                        { name: 'Carulla', price: 310.50, previousPrice: 325.00, rating: 4.3, delivery: 'Gratis +${renderPrice(200)}0' },
+                        { name: 'Olimpica', price: 305.00, previousPrice: 320.00, rating: 4.5, delivery: 'Gratis +${renderPrice(150)}0' },
+                        { name: 'Jumbo', price: 315.00, previousPrice: 330.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' }
+                    ]
+                },
+            ],
+            // Cortes Premium products
+            'Cortes Premium': [
+                { 
+                    id: 2001, 
+                    name: 'Bife de Chorizo 1kg', 
+                    image: 'https://placehold.co/300x400/8b5cf6/ffffff?text=Bife+Chorizo',
+                    category: 'Carnes', 
+                    subcategory: 'Carnes Vacunas', 
+                    subsubcategory: 'Cortes Premium', 
+                    description: 'Corte premium, ideal para asados especiales.',
+                    rating: 4.9,
+                    brand: 'Carnes del Plata',
+                    supermarkets: [
+                        { name: 'Carulla', price: 890.00, previousPrice: 910.00, rating: 4.3, delivery: 'Gratis +${renderPrice(200)}0' },
+                        { name: 'Jumbo', price: 885.00, previousPrice: 905.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        { name: 'Éxito', price: 895.00, previousPrice: 915.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' }
+                    ]
+                }
+            ],
+// Whisky products
+            'Whisky': [
+{ 
+                    id: 8000, 
+                    name: 'Whisky GLENLIVET founders reserve single malt (700 ml)', 
+                    image: 'https://github.com/Oppita/Whisky/blob/main/Whisky%20GLENLIVET%20founders%20reserve%20single%20malt%20(700%20ml).webp?raw=true',
+                    category: 'Bebidas', 
+                    subcategory: 'Licores', 
+                    subsubcategory: 'Whisky', 
+                    description: 'Whisky.',
+                    rating: 4.7,
+                    brand: 'GLENLIVET',
+                    supermarkets: [
+                        { name: 'Carulla', price: 127425.00, previousPrice: 169900.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        { name: 'Zapatoca', price: 238.00, previousPrice: 247.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        { name: 'Olimpica', price: 233.50, previousPrice: 242.00, rating: 4.5, delivery: 'Gratis +${renderPrice(150)}0' }
+                    ]
+                },
+],
+            // Cola products
+            'Cola': [
+                { 
+                    id: 9000, 
+                    name: 'Gaseosa Coca Cola ZERO botella (1500 ml)', 
+                    image: 'https://github.com/Oppita/Gaseosa/blob/main/Gaseosa%20Coca%20Cola%20ZERO%20botella%20(1500%20ml).webp?raw=true',
+                    category: 'Bebidas', 
+                    subcategory: 'Gaseosas', 
+                    subsubcategory: 'Cola', 
+                    description: 'La gaseosa de cola más popular.',
+                    rating: 4.7,
+                    brand: 'Coca-Cola',
+                    supermarkets: [
+                        { name: 'Carulla', price: 4960.00, previousPrice: 245.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        { name: 'Zapatoca', price: 238.00, previousPrice: 247.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        { name: 'Olimpica', price: 233.50, previousPrice: 242.00, rating: 4.5, delivery: 'Gratis +${renderPrice(150)}0' }
+                    ]
+                },
+            ],
+            // 'Aguardientes' products
+            'Aguardientes': [
+{ 
+                    id: 11000, 
+                    name: 'Aguardiente amarillo de manzanares sin azúcar (750 ml)', 
+                    image: 'https://carulla.vtexassets.com/arquivos/ids/22099331/AGUARDIENTE-AMARILLO-MANZANARE-CRISTAL-750-Mililitro-3003709_a.jpg?v=638895022545730000',
+                    category: 'Bebidas', 
+                    subcategory: 'Licores', 
+                    subsubcategory: 'Aguardientes', 
+                    description: 'Aguardientes.',
+                    rating: 4.7,
+                    brand: 'Coca-Cola',
+                    supermarkets: [
+                        { name: 'Carulla', price: 50700.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                    ]
+                },
+            ],
+// 'Espaghettis' products
+            'Espaghettis': [
+                { 
+                    id: 6000, 
+                    name: 'Pastas MONTICELLO spaghetti premium (500 gr)', 
+                    image: 'https://github.com/Oppita/Espaguetthis/blob/main/Pasta-Premium-Spaghetti-X-500-gr-901807_a%20(1).webp?raw=true',
+                    category: 'Almacen', 
+                    subcategory: 'Pastas', 
+                    subsubcategory: 'Espaghettis', 
+                    description: 'Espaghettis.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 6160.00, previousPrice: 8800.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        { name: 'Zapatoca', price: 238.00, previousPrice: 247.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        { name: 'Olimpica', price: 233.50, previousPrice: 242.00, rating: 4.5, delivery: 'Gratis +${renderPrice(150)}0' }
+                    ]
+                },
+            ],
+// 'Mariscos' products
+            'Camarones y Langostinos': [
+                { 
+                    id: 7000, 
+                    name: 'Camarón 26/30 Cocido 500 g', 
+                    image: 'https://hipermarfish.com/pedidosonline/items/GATB052920200722_1600.jpg',
+                    category: 'Pescados y Mariscos', 
+                    subcategory: 'Mariscos', 
+                    subsubcategory: 'Camarones y Langostinos', 
+                    description: 'Espaghettis.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'HiperMarFish', price: 30000.00, previousPrice: 31500.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                    ]
+                },
+                ],
+                // 'Mariscos' products
+            'Almejas y Mejillones': [
+                { 
+                    id: 7500, 
+                    name: 'Ostra Entera 1Und ', 
+                    image: 'https://hipermarfish.com/pedidosonline/items/19008.jpg',
+                    category: 'Pescados y Mariscos', 
+                    subcategory: 'Mariscos', 
+                    subsubcategory: 'Almejas y Mejillones', 
+                    description: 'Mariscos.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'HiperMarFish', price: 5000.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                    ]
+                },
+                ],
+                // 'Mariscos' products
+            'Calamares y Pulpos': [
+{ 
+                    id: 75000, 
+                    name: 'Calamar Baby Sepia 500 g', 
+                    image: 'https://hipermarfish.com/pedidosonline/items/Hipermar%2019%20marzo%2020240226.jpg',
+                    category: 'Pescados y Mariscos', 
+                    subcategory: 'Mariscos', 
+                    subsubcategory: 'Calamares y Pulpos', 
+                    description: 'Mariscos.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'HiperMarFish', price: 27500.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                    ]
+                },
+                ],
+                // 'Pescados' products
+            'Pescados Enteros': [
+{ 
+                    id: 5000, 
+                    name: 'Sierra en Posta Und x 1000 g ',                  
+                    image: 'https://hipermarfish.com/pedidosonline/items/DSC00203.JPG',
+                    category: 'Pescados y Mariscos', 
+                    subcategory: 'Pescados', 
+                    subsubcategory: 'Pescados Enteros', 
+                    description: 'Pescados.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'HiperMarFish', price: 25000.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                    ]
+                },
+                ],
+                // Vinagre products
+            'Vinagres Blancos': [
+{ 
+                    id: 10000, 
+                     name: 'Vinagre COLMANS blanco (1000 ml) ',                  
+                    image: 'https://carulla.vtexassets.com/arquivos/ids/22405088/Vinagre-Blanco-COLMANS-1000-ml-3436200_a.jpg?v=638918995986530000',
+                    category: 'Almacen', 
+                    subcategory: 'Vinagres', 
+                    subsubcategory: 'Vinagres Naturales', 
+                    description: 'Vinagre.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 6500.00, previousPrice: 7400.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+                ],
+                // Vinagre products
+            'Vinagres Balsámicos': [
+                 { 
+                    id: 10500, 
+                     name: 'Vinagre PIATTO balsámico agraz (330 gr)',                  
+                    image: 'https://carulla.vtexassets.com/arquivos/ids/22405113/Reduccion-Vinagre-Clasico-PIATTO-330-gr-3330559_a.jpg?v=638918996141600000',
+                    category: 'Almacen', 
+                    subcategory: 'Vinagres', 
+                    subsubcategory: 'Vinagres Balsámicos', 
+                    description: 'Vinagre.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 34500.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+        ],
+        // Vinagre products
+            'Vinagres de Manzana y Sidra de Manzana': [
+{ 
+                    id: 11000, 
+                     name: 'Vinagre de manzana MANZATO  (500 ml)',                  
+                    image: 'https://carulla.vtexassets.com/arquivos/ids/18847708/Viangre-sidra-x-500-g-1723018_a.jpg?v=638708387793900000',
+                    category: 'Almacen', 
+                    subcategory: 'Vinagres', 
+                    subsubcategory: 'Vinagres Balsámicos', 
+                    description: 'Vinagre.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 39000.00, previousPrice: 42200.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+            ], 
+            // Vinagre products
+            'Otros Vinagres': [
+              { 
+                    id: 11500, 
+                     name: 'Ponzu Vinagre de Frutas Mizkan (1800 ml)',                  
+                    image: 'https://hipermarfish.com/pedidosonline/items/3752.jpg',
+                    category: 'Almacen', 
+                    subcategory: 'Vinagres', 
+                    subsubcategory: 'Otros Vinagres', 
+                    description: 'Vinagre.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'HiperMarFish', price: 44900.00, previousPrice: 42400.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+        ],
+        // Harina products
+            'Harinas de Trigo': [
+{ 
+                    id: 12000, 
+                     name: 'Harina de trigo HAZ DE OROS tradicional (500 gr)',                  
+                    image: 'https://carulla.vtexassets.com/arquivos/ids/21788970/Harina-De-Trigo-13520_a.jpg?v=638881188960630000',
+                    category: 'Almacen', 
+                    subcategory: 'Harinas', 
+                    subsubcategory: 'Harinas de Trigo', 
+                    description: 'Harinas.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 2400.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+],
+// Agua products
+            'Agua sin gas': [
+{ 
+                    id: 13000, 
+                     name: 'Agua BRISA sin gas botellón (6000 ml)',                  
+                    image: 'https://carulla.vtexassets.com/arquivos/ids/21657050/Agua-Brisa-Garrafa-6-Lts-588962_a.jpg?v=638859481975430000',
+                    category: 'Bebidas', 
+                    subcategory: 'Aguas', 
+                    subsubcategory: 'Agua sin gas', 
+                    description: 'Aguas.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 10300.00, previousPrice: 3500.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+        ],
+        // Cerveza products
+            'Importadas': [
+{ 
+                    id: 14000, 
+                     name: 'Cerveza Belgica Sixpack STELLA ARTOIS 1980 ml',                  
+                    image: 'https://carulla.vtexassets.com/arquivos/ids/18849767/Cerveza-Belgica-Sixpack-STELLA-ARTOIS-1980-ml-3050604_a.jpg?v=638709121533970000',
+                    category: 'Bebidas', 
+                    subcategory: 'Cervezas', 
+                    subsubcategory: 'Importadas', 
+                    description: 'Cervezas.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 31300.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+        ],
+// Cerveza products
+            'Nacionales': [
+{ 
+                    id: 13500, 
+                     name: 'Cerveza X 6 LATA DORADA CLUB COLOMBIA 1980 ml',                  
+                    image: 'https://carulla.vtexassets.com/arquivos/ids/19583152/Cerveza-x-6-lata-dorada-Club-colombia-102016_a.jpg?v=638739890166430000',
+                    category: 'Bebidas', 
+                    subcategory: 'Cervezas', 
+                    subsubcategory: 'Nacionales', 
+                    description: 'Cervezas.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 16320.00, previousPrice: 21000.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+            ],
+            // Carne products
+            'Embutidos': [
+{ 
+                    id: 14500, 
+                     name: 'CHORIZO PREMIUM X 640 GR',                  
+                    image: 'https://cdnx.jumpseller.com/puntos-de-venta-aliar/image/65871938/CHORIZO_20DE_20CERDO_20PREMIUN_20640GR_20F.jpg?1753727020',
+                    category: 'Bebidas', 
+                    subcategory: 'Carnes Frias y Embutidos', 
+                    subsubcategory: 'Embutidos', 
+                    description: 'Carnes.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'La Fazenda', price: 23850.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+
+            ],
+            // Carne products
+            'Carnes Frias': [
+{ 
+                    id: 15000, 
+                     name: 'COSTILLITAS AHUMADAS X 500 GR',                  
+                     image: 'https://cdnx.jumpseller.com/puntos-de-venta-aliar/image/65872124/COSTILLAS_20AHUMADAS_20500GR_20F.jpg?1753727220',
+                    category: 'Bebidas', 
+                    subcategory: 'Carnes Frias y Embutidos', 
+                    subsubcategory: 'Embutidos', 
+                    description: 'Carnes.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'La Fazenda', price: 23700.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+],
+// Carnes products
+            'Costillas': [
+{ 
+                    id: 15500, 
+                     name: 'BABY BACK RIBS 940G',                  
+                     image: 'https://cdnx.jumpseller.com/puntos-de-venta-aliar/image/8324707/Baby_Back_Ribs.jpg?1654085722',
+                    category: 'Carnes', 
+                    subcategory: 'Carnes de Cerdo', 
+                    subsubcategory: 'Costillas', 
+                    description: 'Carnes.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'La Fazenda', price: 28529.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+        ],
+// Carnes products
+            'Carne de cerdo': [
+{ 
+                    id: 16000, 
+                     name: 'CARNE MOLIDA de Cerdo 640G',                  
+                     image: 'https://cdnx.jumpseller.com/puntos-de-venta-aliar/image/8325896/Carne_Molida_Repetida_Detalle.jpg?1654085941',
+                    category: 'Carnes', 
+                    subcategory: 'Carnes de Cerdo', 
+                    subsubcategory: 'Carne de cerdo', 
+                    description: 'Carnes.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'La Fazenda', price: 12512.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+            ],
+            // Lacteos products
+            'Leche Entera': [
+{ 
+                    id: 16500, 
+                     name: 'Leche FRESCAMPO entera x6und (5400 ml)',                  
+                     image: 'https://carulla.vtexassets.com/arquivos/ids/23206722/Leche-Entera-UHT-Paquete-FRESCAMPO-5400-ml-3326801_a.jpg?v=638931941802170000',
+                    category: 'Lácteos', 
+                    subcategory: 'Leches', 
+                    subsubcategory: 'Leche Entera', 
+                    description: 'Lácteos.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 16980.00, previousPrice: 17040.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+             ],
+             // Carnes products
+            'Queso Parmesano': [
+{ 
+                    id: 17500, 
+                     name: 'Queso Parmesano ALPINA rallado (100 gr)',                  
+                     image: 'https://carulla.vtexassets.com/arquivos/ids/23205406/Queso-Parmesano-X-100g-20724_a.jpg?v=638931928022170000',
+                    category: 'Lácteos', 
+                    subcategory: 'Quesos', 
+                    subsubcategory: 'Queso Parmesano', 
+                    description: 'Lácteos.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 14400.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+],
+             // Carnes products
+            'Yogures Griegos': [
+{ 
+                    id: 17000, 
+                     name: 'Yogurt griego DEJAMU entero natural (937 ml)',                  
+                     image: 'https://carulla.vtexassets.com/arquivos/ids/23205700/Yogurt-Griego-Natural-1275184_a.jpg?v=638931931311400000',
+                    category: 'Lácteos', 
+                    subcategory: 'Yogures', 
+                    subsubcategory: 'Yogures Griegos', 
+                    description: 'Lácteos.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 24450.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+            ],
+            // Frutas y Verduras products
+            'Frescas': [
+{ 
+                    id: 17500, 
+                     name: 'Limón Tahití Malla TAEQ 1000 gr',                  
+                     image: 'https://carulla.vtexassets.com/arquivos/ids/17385067/Limon-Tahiti-Malla-1000g-594130_a.jpg?v=638609239719970000',
+                    category: 'Frutas y Verduras', 
+                    subcategory: 'Frutas', 
+                    subsubcategory: 'Frescas', 
+                    description: 'Frutas y Verduras.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 6992.00, previousPrice: 8740.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+            ],
+            // Granos products
+            'Lentejas': [
+{ 
+                    id: 18000, 
+                     name: 'Lenteja FRESCAMPO granos seleccionados (1000 gr)',
+                     image: 'https://carulla.vtexassets.com/arquivos/ids/21684539/Lenteja-Frescampo-X-1000-gr-1121606_a.jpg?v=638864601026870000',                  
+                    category: 'Almacen', 
+                    subcategory: 'Granos', 
+                    subsubcategory: 'Lentejas', 
+                    description: 'Granos.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 5690.00, previousPrice: 5890.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+
+            ],
+            // Granos products
+            'Frijoles': [
+{ 
+                    id: 18500, 
+                     name: 'Frijol DIANA cargamanto (500 gr)',
+                     image: 'https://carulla.vtexassets.com/arquivos/ids/21684381/FRIJOL-CARGAMANTO-DIANA-500-gr-1744336_a.jpg?v=638864599543270000',                  
+                    category: 'Almacen', 
+                    subcategory: 'Granos', 
+                    subsubcategory: 'Frijoles', 
+                    description: 'Granos.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price: 7352.00, previousPrice: 8650.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+],
+// Granos products
+            'Garbanzos': [
+{ 
+                    id: 19000, 
+                     name: ' Garbanzo FRESCAMPO granos seleccionados (500 gr)',
+                     image: 'https://carulla.vtexassets.com/arquivos/ids/21684522/Garbanzo-1121569_a.jpg?v=638864600891300000',                  
+                    category: 'Almacen', 
+                    subcategory: 'Granos', 
+                    subsubcategory: 'Garbanzos', 
+                    description: 'Granos.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price:3950.00, previousPrice: 4000.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+            ],
+            // Granos products
+            'Arvejas': [
+{ 
+                    id: 19500, 
+                     name: ' Arveja LA FLORESTA* sabor y calidad (500 gr)',
+                     image: 'https://carulla.vtexassets.com/arquivos/ids/21684582/Arveja-Floresta500G-LA-FLORESTA-500-gr-26044_a.jpg?v=638864602838500000',                  
+                    category: 'Almacen', 
+                    subcategory: 'Granos', 
+                    subsubcategory: 'Arvejas', 
+                    description: 'Granos.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price:3070.00, previousPrice: 0.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+],
+// Granos products
+            'Yogures Naturales': [
+{ 
+                    id: 20000, 
+                     name: ' Bebida láctea YOX surtido sin azúcar x8und (760 ml)',
+                     image: 'https://carulla.vtexassets.com/arquivos/ids/23206380/ALIM-LACT-FRESMELO-SAZUCAR-YOX-800-Gramo-3003970_a.jpg?v=638931938577570000',                  
+                    category: 'Bebidas', 
+                    subcategory: 'Lácteos', 
+                    subsubcategory: 'Yogures Naturales', 
+                    description: 'Granos.',
+                    rating: 4.7,
+                    brand: 'Monticello',
+                    supermarkets: [
+                        { name: 'Carulla', price:16400.00, previousPrice: 21600.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+                },
+                
+
+],
+// Iphone products
+            'Iphone': [
+
+
+            ],
+
+            // Iphone products
+            'Televisores': [
+{ 
+                    id: 22500, 
+                     name: ' Televisor SAMSUNG 65 pulgadas LED Uhd4K Smart TV UN65DU7000KXZL',
+                     image: 'https://carulla.vtexassets.com/arquivos/ids/21839005/Televisor-SAMSUNG-65-Pulgadas-LED-Uhd-4K-Smart-TV-UN65DU7000KXZL-3555752_a.jpg?v=638934497699700000',                  
+                    category: 'Tecnología y Electrodomésticos', 
+                    subcategory: 'Celulares', 
+                    subsubcategory: 'Iphone', 
+                    description: 'Iphone.',
+                    rating: 4.7,
+                    brand: 'Iphone',
+                    supermarkets: [
+                        { name: 'Carulla', price:2299900.00, previousPrice: 4099900.00, rating: 4.7, delivery: 'Gratis +${renderPrice(180)}0' },
+                        
+                    ]
+
+                }
+
+            ]
+        };
+        // Helper: Extract quantity and unit from product name
+        function extractQuantity(productName) {
+            const match = productName.match(/(\d+(?:\.\d+)?)\s*(ml|gr|g|kg|l)/i);
+            if (!match) return { quantity: 1, unit: 'unidad' };
+            let quantity = parseFloat(match[1]);
+            const unit = match[2].toLowerCase();
+            // Normalize to grams or ml
+            if (unit === 'kg') quantity *= 1000;
+            if (unit === 'l') quantity *= 1000;
+            return { quantity, unit: unit === 'kg' || unit === 'l' ? (unit === 'kg' ? 'gr' : 'ml') : unit };
+        }
+        // Get all products (for global search)
+        function getAllProducts() {
+            let allProducts = [];
+            for (const subsub in products) {
+                allProducts = allProducts.concat(products[subsub]);
+            }
+            return allProducts;
+        }
+        // --- Productos Destacados (nuevo) ---
+        function renderFeaturedProducts(limit = 5) {
+            const container = document.getElementById('featured-products-container');
+            if (!container) return;
+            const all = getAllProducts();
+            if (!all || all.length === 0) {
+                container.innerHTML = '<p class="text-white text-center col-span-full">No hay productos para mostrar</p>';
+                return;
+            }
+            // calcular ahorro (max - min) y ordenar por mayor ahorro
+            const withSavings = all.map(p => {
+                const prices = (p.supermarkets || []).map(s => s.price || 0);
+                const min = prices.length ? Math.min(...prices) : 0;
+                const max = prices.length ? Math.max(...prices) : min;
+                return { product: p, saving: max - min, minPrice: min };
+            });
+            withSavings.sort((a, b) => (b.saving - a.saving) || (a.minPrice - b.minPrice));
+            const selection = withSavings.slice(0, limit).map(x => x.product);
+            container.innerHTML = '';
+
+            selection.forEach(product => {
+                const prices = (product.supermarkets || []).map(s => s.price || 0);
+                const lowestPrice = prices.length ? Math.min(...prices) : 0;
+                const lowestSupermarket = (product.supermarkets || []).find(s => s.price === lowestPrice) || { name: '' };
+
+                const card = document.createElement('div');
+                card.className = 'product-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group cursor-pointer';
+                card.style.minHeight = '260px';
+                card.innerHTML = `
+                    <div class="relative">
+                        <img src="${product.image || ''}" alt="${product.name || ''}" class="w-full h-40 object-cover group-hover:scale-105 transition duration-300">
+                    </div>
+                    <div class="p-4">
+                        <h3 class="font-bold text-gray-800 text-lg line-clamp-2 mb-1">${product.name || ''}</h3>
+                        <p class="text-gray-500 text-sm mb-2">${product.brand || ''}</p>
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-green-700 font-bold text-lg">${renderPrice(lowestPrice)}</p>
+                                <p class="text-xs text-gray-500">En ${lowestSupermarket.name || ''}</p>
+                            </div>
+                            <div class="flex flex-col items-end gap-2">
+                                <button class="add-to-cart-mini bg-green-500 text-white px-3 py-1 rounded-lg">Agregar</button>
+                                <button class="view-prices-mini bg-purple-700 text-white px-3 py-1 rounded-lg">Ver</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Click en la tarjeta -> abrir detalle (reusar lógica existente)
+                card.onclick = () => {
+                    state.selectedProduct = product;
+                    if (typeof showPricesPage === 'function') showPricesPage();
+                };
+                // Botón agregar (evita propagación)
+                const addBtn = card.querySelector('.add-to-cart-mini');
+                if (addBtn) addBtn.onclick = (e) => { e.stopPropagation(); addToCart(product, lowestSupermarket.name); };
+
+                const viewBtn = card.querySelector('.view-prices-mini');
+                if (viewBtn) viewBtn.onclick = (e) => { e.stopPropagation(); state.selectedProduct = product; if (typeof showPricesPage === 'function') showPricesPage(); };
+
+                container.appendChild(card);
+            });
+        }
+        // --- Fin Productos Destacados ---
+
+
+        // Get products for a subsubcategory
+        function getProducts(subsubcategory) {
+            return products[subsubcategory] || [];
+        }
+        // Show notification
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notification-message');
+            notificationMessage.textContent = message;
+            notification.classList.remove('hidden');
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+        }
+        // Check price alerts
+        function checkPriceAlerts() {
+            state.priceAlerts.forEach(alert => {
+                const product = getAllProducts().find(p => p.id === alert.productId);
+                if (product) {
+                    const currentLowest = Math.min(...product.supermarkets.map(s => s.price));
+                    if (currentLowest < alert.targetPrice) {
+                        showNotification(`¡Bajó el precio! ${product.name} ahora está en ${renderPrice(currentLowest)} (antes ${renderPrice(alert.targetPrice)})`);
+                        // Opcional: desactivar alerta tras notificar
+                        state.priceAlerts = state.priceAlerts.filter(a => a.productId !== alert.productId);
+                    }
+                }
+            });
+        }
+        // Navigation functions
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('[id$="-page"]').forEach(page => {
+                page.classList.add('hidden');
+            });
+            // Show the requested page
+            document.getElementById(pageId).classList.remove('hidden');
+            state.currentPage = pageId.replace('-page', '');
+        }
+        function showLandingPage() {
+            showPage('landing-page');
+        }
+        function showRegisterPage() {
+            showPage('register-page');
+        }
+        function showLoginPage() {
+            showPage('login-page');
+        }
+        function showCategoriesPage() {
+    state.currentProductList = null;
+            if (!state.isLoggedIn) {
+                showLoginPage();
+                return;
+            }
+            // Populate main categories
+            const container = document.getElementById('main-categories-container');
+            container.innerHTML = '';
+            renderCategories();
+            // Renderizar productos destacados debajo de las categorías
+            renderFeaturedProducts();
+// Add global search functionality
+            const globalSearch = document.getElementById('global-search');
+            globalSearch.value = '';
+            globalSearch.oninput = () => {
+                const query = globalSearch.value.toLowerCase();
+                if (query.trim() === '') { renderCategories();
+            // Renderizar productos destacados debajo de las categorías
+            renderFeaturedProducts(); } else {
+                    const allProducts = getAllProducts();
+                    const filteredProducts = allProducts.filter(product => 
+                        product.name.toLowerCase().includes(query) ||
+                        product.description.toLowerCase().includes(query)
+                    );
+                    // Sort by price per unit
+                    const sortedProducts = filteredProducts.map(product => {
+                        const { quantity, unit } = extractQuantity(product.name);
+                        const lowestPrice = Math.min(...product.supermarkets.map(s => s.price));
+                        const pricePerUnit = quantity > 0 ? lowestPrice / quantity : lowestPrice;
+                        return { ...product, pricePerUnit, quantity, unit };
+                    }).sort((a, b) => a.pricePerUnit - b.pricePerUnit);
+                    container.innerHTML = '';
+                    if (sortedProducts.length === 0) {
+                        container.innerHTML = '<div class="col-span-full text-center py-8 text-gray-500">No se encontraron productos</div>';
+                    } else {
+                        sortedProducts.forEach(product => {
+                            const lowestPrice = Math.min(...product.supermarkets.map(s => s.price));
+                            const lowestSupermarket = product.supermarkets.find(s => s.price === lowestPrice);
+                            const isFavorite = state.favorites.some(fav => fav.id === product.id);
+                            // NUEVO: Verificar si hay alerta activa
+                            const hasAlert = state.priceAlerts.some(alert => alert.productId === product.id);
+                            const productCard = document.createElement('div');
+                            productCard.className = 'product-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group w-full';
+                            productCard.innerHTML = `
+                                <div class="relative">
+                                    <img src="${product.image}" alt="${product.name}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300 cursor-pointer">
+                                    <div class="absolute top-2 right-2 flex flex-col gap-1">
+                                        ${lowestSupermarket.previousPrice > lowestPrice ? `<span class="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">OFERTA</span>` : ''}
+                                    </div>
+                                    <button class="favorite-btn absolute top-2 left-2 p-2 rounded-full transition duration-300 ${isFavorite ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-white bg-opacity-80 text-gray-700 hover:bg-opacity-100'}">
+                                        ${isFavorite ? '❤️' : '🤍'}
+                                    </button>
+                                    <!-- NUEVO: Botón de alerta en la esquina inferior derecha -->
+                                    <button class="alert-btn absolute bottom-2 right-2 p-2 rounded-full transition duration-300 ${hasAlert ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-white bg-opacity-80 text-gray-700 hover:bg-opacity-100'}">
+                                        ${hasAlert ? '🔔' : '🔕'}
+                                    </button>
+                                </div>
+                                <div class="p-4">
+                                    <div class="flex justify-between items-start mb-2">
+                                        <h3 class="font-bold text-gray-800 text-sm line-clamp-2">${product.name}</h3>
+                                        <div class="flex items-center">
+                                            <span class="text-yellow-500 text-sm font-bold">${product.rating}</span>
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-600 text-xs mb-3 line-clamp-2">${product.description}</p>
+                                    <div class="mb-3">
+                                        <div class="flex items-center">
+                                            <span class="text-xl font-bold text-green-600">${renderPrice(lowestPrice)}</span>
+                                            ${lowestSupermarket.previousPrice > lowestPrice ? `<div class="ml-2 flex items-center text-sm text-green-600">↓ ${(((lowestSupermarket.previousPrice - lowestPrice) / lowestSupermarket.previousPrice) * 100).toFixed(1)}%</div>` : ''}
+                                        </div>
+                                        <p class="text-xs text-gray-500">En ${lowestSupermarket.name}</p>
+                                        <p class="text-xs text-purple-600 mt-1">Precio por ${product.unit}: ${renderPrice(product.pricePerUnit)}</p>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button class="view-prices-btn flex-1 bg-purple-700 text-white py-2 px-3 rounded-lg font-semibold hover:bg-purple-800 transition duration-300 text-sm">
+                                            Ver supermercados
+                                        </button>
+                                        <button class="add-to-cart-btn bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition duration-300">
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                            `;
+                            // Add event listeners
+                            const img = productCard.querySelector('img');
+                            const viewPricesBtn = productCard.querySelector('.view-prices-btn');
+                            const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
+                            const favoriteBtn = productCard.querySelector('.favorite-btn');
+                            // NUEVO: Agregar listener para el botón de alerta
+                            const alertBtn = productCard.querySelector('.alert-btn');
+                            img.onclick = () => {
+                                state.selectedProduct = product;
+                                showPricesPage();
+                            };
+                            viewPricesBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                state.selectedProduct = product;
+                                showPricesPage();
+                            };
+                            addToCartBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                addToCart(product, lowestSupermarket.name);
+                            };
+                            favoriteBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                toggleFavorite(product);
+                            };
+                            // NUEVO: Listener para el botón de alerta
+                            alertBtn.onclick = (e) => {
+                                e.stopPropagation();
+                                toggleAlert(product);
+                            };
+                            container.appendChild(productCard);
+                        });
+                    }
+                }
+            };
+            showPage('categories-page');
+        }
+        function showSubcategoriesPage() {
+            if (!state.isLoggedIn) {
+                showLoginPage();
+                return;
+            }
+            const currentSubcategories = categories.sub[state.selectedCategory.main] || [];
+            const container = document.getElementById('subcategories-container');
+            const title = document.getElementById('subcategory-title');
+            title.textContent = `Subcategorías de ${state.selectedCategory.main}`;
+            container.innerHTML = '';
+            
+currentSubcategories.forEach(subcategory => {
+    const subcategoryCard = document.createElement('button');
+    subcategoryCard.className = 'card-base';
+    subcategoryCard.innerHTML = `
+        <i data-lucide="${getLucideIcon(subcategory.name)}" class="card-icon"></i>
+        <p class="card-text">${subcategory.name}</p>
+    `;
+    subcategoryCard.onclick = () => {
+        state.selectedCategory.sub = subcategory.name;
+        showSubsubcategoriesPage();
+    };
+    container.appendChild(subcategoryCard);
+});
+lucide.createIcons();
+
+            showPage('subcategories-page');
+        }
+        function showSubsubcategoriesPage() {
+            if (!state.isLoggedIn) {
+                showLoginPage();
+                return;
+            }
+            const currentSubsubcategories = categories.subsub[state.selectedCategory.sub] || [];
+            const container = document.getElementById('subsubcategories-container');
+            const title = document.getElementById('subsubcategory-title');
+            title.textContent = `Sub-subcategorías de ${state.selectedCategory.sub}`;
+            container.innerHTML = '';
+            
+currentSubsubcategories.forEach(subsubcategory => {
+    const subsubcategoryCard = document.createElement('button');
+    subsubcategoryCard.className = 'card-base';
+    subsubcategoryCard.innerHTML = `
+        <i data-lucide="${getLucideIcon(subsubcategory.name)}" class="card-icon"></i>
+        <p class="card-text">${subsubcategory.name}</p>
+    `;
+    subsubcategoryCard.onclick = () => {
+        state.selectedCategory.subsub = subsubcategory.name;
+        showProductsPage();
+    };
+    container.appendChild(subsubcategoryCard);
+});
+lucide.createIcons();
+
+            showPage('subsubcategories-page');
+        }
+        function showProductsPage() {
+            if (!state.isLoggedIn) {
+                showLoginPage();
+                return;
+            }
+            let productList = getProducts(state.selectedCategory.subsub);
+    state.currentProductList = productList;
+            // Calculate price per unit and sort
+            productList = productList.map(product => {
+                const { quantity, unit } = extractQuantity(product.name);
+                const lowestPrice = Math.min(...product.supermarkets.map(s => s.price));
+                const pricePerUnit = quantity > 0 ? lowestPrice / quantity : lowestPrice;
+                return { ...product, pricePerUnit, quantity, unit };
+            }).sort((a, b) => a.pricePerUnit - b.pricePerUnit);
+            const container = document.getElementById('products-container');
+            const title = document.getElementById('products-title');
+            title.textContent = `Productos en ${state.selectedCategory.subsub}`;
+            container.innerHTML = '';
+            productList.forEach(product => {
+                const lowestPrice = Math.min(...product.supermarkets.map(s => s.price));
+                const lowestSupermarket = product.supermarkets.find(s => s.price === lowestPrice);
+                const isFavorite = state.favorites.some(fav => fav.id === product.id);
+                // NUEVO: Verificar si hay alerta activa
+                const hasAlert = state.priceAlerts.some(alert => alert.productId === product.id);
+                // Calculate savings
+                const highestPrice = Math.max(...product.supermarkets.map(s => s.price));
+                const savings = highestPrice - lowestPrice;
+                // Calculate price bar width (relative to highest price in this product list)
+                const maxPrice = Math.max(...productList.map(p => Math.min(...p.supermarkets.map(s => s.price))));
+                const priceBarWidth = maxPrice > 0 ? (lowestPrice / maxPrice) * 100 : 0;
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group w-full';
+                productCard.innerHTML = `
+                    <div class="relative">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300 cursor-pointer">
+                        <div class="absolute top-2 right-2 flex flex-col gap-1">
+                            ${lowestSupermarket.previousPrice > lowestPrice ? `<span class="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">OFERTA</span>` : ''}
+                        </div>
+                        <button class="favorite-btn absolute top-2 left-2 p-2 rounded-full transition duration-300 ${isFavorite ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-white bg-opacity-80 text-gray-700 hover:bg-opacity-100'}">
+                            ${isFavorite ? '❤️' : '🤍'}
+                        </button>
+                        <!-- NUEVO: Botón de alerta en la esquina inferior derecha -->
+                        <button class="alert-btn absolute bottom-2 right-2 p-2 rounded-full transition duration-300 ${hasAlert ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-white bg-opacity-80 text-gray-700 hover:bg-opacity-100'}">
+                            ${hasAlert ? '🔔' : '🔕'}
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h3 class="font-bold text-gray-800 text-sm line-clamp-2">${product.name}</h3>
+                            <div class="flex items-center">
+                                <span class="text-yellow-500 text-sm font-bold">${product.rating}</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-600 text-xs mb-3 line-clamp-2">${product.description}</p>
+                        <div class="mb-3">
+                            <div class="flex items-center">
+                                <span class="text-xl font-bold text-green-600">${renderPrice(lowestPrice)}</span>
+                                ${lowestSupermarket.previousPrice > lowestPrice ? `<div class="ml-2 flex items-center text-sm text-green-600">↓ ${(((lowestSupermarket.previousPrice - lowestPrice) / lowestSupermarket.previousPrice) * 100).toFixed(1)}%</div>` : ''}
+                            </div>
+                            <p class="text-xs text-gray-500">En ${lowestSupermarket.name}</p>
+                            <p class="text-xs text-purple-600 mt-1">Precio por ${product.unit}: ${renderPrice(product.pricePerUnit)}</p>
+                            ${savings > 0 ? `<p class="text-xs text-blue-600 mt-1">Ahorras ${renderPrice(savings)} vs. el más caro</p>` : ''}
+                            <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
+                                <div class="price-bar" style="width: ${priceBarWidth}%;"></div>
+                            </div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="view-prices-btn flex-1 bg-purple-700 text-white py-2 px-3 rounded-lg font-semibold hover:bg-purple-800 transition duration-300 text-sm">
+                                Ver supermercados
+                            </button>
+                            <button class="add-to-cart-btn bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition duration-300">
+                                +
+                            </button>
+                        </div>
+                    </div>
+                `;
+                // Add event listeners
+                const img = productCard.querySelector('img');
+                const viewPricesBtn = productCard.querySelector('.view-prices-btn');
+                const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
+                const favoriteBtn = productCard.querySelector('.favorite-btn');
+                // NUEVO: Agregar listener para el botón de alerta
+                const alertBtn = productCard.querySelector('.alert-btn');
+                img.onclick = () => {
+                    state.selectedProduct = product;
+                    showPricesPage();
+                };
+                viewPricesBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    state.selectedProduct = product;
+                    showPricesPage();
+                };
+                addToCartBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    addToCart(product, lowestSupermarket.name);
+                };
+                favoriteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleFavorite(product);
+                };
+                // NUEVO: Listener para el botón de alerta
+                alertBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    toggleAlert(product);
+                };
+                container.appendChild(productCard);
+            });
+            // Add search functionality
+            const searchInput = document.getElementById('search-input');
+            searchInput.value = '';
+            searchInput.oninput = () => {
+                const query = searchInput.value.toLowerCase();
+                const filteredProducts = productList.filter(product => 
+                    product.name.toLowerCase().includes(query) ||
+                    product.description.toLowerCase().includes(query)
+                );
+                container.innerHTML = '';
+                filteredProducts.forEach(product => {
+                    const lowestPrice = Math.min(...product.supermarkets.map(s => s.price));
+                    const lowestSupermarket = product.supermarkets.find(s => s.price === lowestPrice);
+                    const isFavorite = state.favorites.some(fav => fav.id === product.id);
+                    // NUEVO: Verificar si hay alerta activa
+                    const hasAlert = state.priceAlerts.some(alert => alert.productId === product.id);
+                    // Calculate savings
+                    const highestPrice = Math.max(...product.supermarkets.map(s => s.price));
+                    const savings = highestPrice - lowestPrice;
+                    // Calculate price bar width
+                    const maxPrice = Math.max(...filteredProducts.map(p => Math.min(...p.supermarkets.map(s => s.price))));
+                    const priceBarWidth = maxPrice > 0 ? (lowestPrice / maxPrice) * 100 : 0;
+                    const productCard = document.createElement('div');
+                    productCard.className = 'product-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group w-full';
+                    productCard.innerHTML = `
+                        <div class="relative">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300 cursor-pointer">
+                            <div class="absolute top-2 right-2 flex flex-col gap-1">
+                                ${lowestSupermarket.previousPrice > lowestPrice ? `<span class="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">OFERTA</span>` : ''}
+                            </div>
+                            <button class="favorite-btn absolute top-2 left-2 p-2 rounded-full transition duration-300 ${isFavorite ? 'bg-red-500 text-white hover:bg-red-600' : 'bg-white bg-opacity-80 text-gray-700 hover:bg-opacity-100'}">
+                                ${isFavorite ? '❤️' : '🤍'}
+                            </button>
+                            <!-- NUEVO: Botón de alerta en la esquina inferior derecha -->
+                            <button class="alert-btn absolute bottom-2 right-2 p-2 rounded-full transition duration-300 ${hasAlert ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-white bg-opacity-80 text-gray-700 hover:bg-opacity-100'}">
+                                ${hasAlert ? '🔔' : '🔕'}
+                            </button>
+                        </div>
+                        <div class="p-4">
+                            <div class="flex justify-between items-start mb-2">
+                                <h3 class="font-bold text-gray-800 text-sm line-clamp-2">${product.name}</h3>
+                                <div class="flex items-center">
+                                    <span class="text-yellow-500 text-sm font-bold">${product.rating}</span>
+                                </div>
+                            </div>
+                            <p class="text-gray-600 text-xs mb-3 line-clamp-2">${product.description}</p>
+                            <div class="mb-3">
+                                <div class="flex items-center">
+                                    <span class="text-xl font-bold text-green-600">${renderPrice(lowestPrice)}</span>
+                                    ${lowestSupermarket.previousPrice > lowestPrice ? `<div class="ml-2 flex items-center text-sm text-green-600">↓ ${(((lowestSupermarket.previousPrice - lowestPrice) / lowestSupermarket.previousPrice) * 100).toFixed(1)}%</div>` : ''}
+                                </div>
+                                <p class="text-xs text-gray-500">En ${lowestSupermarket.name}</p>
+                                <p class="text-xs text-purple-600 mt-1">Precio por ${product.unit}: ${renderPrice(product.pricePerUnit)}</p>
+                                ${savings > 0 ? `<p class="text-xs text-blue-600 mt-1">Ahorras ${renderPrice(savings)} vs. el más caro</p>` : ''}
+                                <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
+                                    <div class="price-bar" style="width: ${priceBarWidth}%;"></div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="view-prices-btn flex-1 bg-purple-700 text-white py-2 px-3 rounded-lg font-semibold hover:bg-purple-800 transition duration-300 text-sm">
+                                    Ver supermercados
+                                </button>
+                                <button class="add-to-cart-btn bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition duration-300">
+                                    +
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    // Add event listeners
+                    const img = productCard.querySelector('img');
+                    const viewPricesBtn = productCard.querySelector('.view-prices-btn');
+                    const addToCartBtn = productCard.querySelector('.add-to-cart-btn');
+                    const favoriteBtn = productCard.querySelector('.favorite-btn');
+                    // NUEVO: Agregar listener para el botón de alerta
+                    const alertBtn = productCard.querySelector('.alert-btn');
+                    img.onclick = () => {
+                        state.selectedProduct = product;
+                        showPricesPage();
+                    };
+                    viewPricesBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        state.selectedProduct = product;
+                        showPricesPage();
+                    };
+                    addToCartBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        addToCart(product, lowestSupermarket.name);
+                    };
+                    favoriteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleFavorite(product);
+                    };
+                    // NUEVO: Listener para el botón de alerta
+                    alertBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleAlert(product);
+                    };
+                    container.appendChild(productCard);
+                });
+            };
+            showPage('products-page');
+        }
+        function showPricesPage() {
+            if (!state.isLoggedIn) {
+                showLoginPage();
+                return;
+            }
+            // Sort supermarkets by price (lowest first)
+            const sortedSupermarkets = [...state.selectedProduct.supermarkets].sort((a, b) => a.price - b.price);
+            const isFavorite = state.favorites.some(fav => fav.id === state.selectedProduct.id);
+            const productDetails = document.getElementById('product-details');
+            const pricesContainer = document.getElementById('prices-container');
+            const title = document.getElementById('product-name-title');
+            const favoriteToggle = document.getElementById('favorite-toggle');
+            title.textContent = `Precios de ${state.selectedProduct.name}`;
+            favoriteToggle.innerHTML = isFavorite ? '❤️' : '🤍';
+            favoriteToggle.onclick = () => {
+                toggleFavorite(state.selectedProduct);
+            };
+            // Calculate price per unit for display
+            const { quantity, unit } = extractQuantity(state.selectedProduct.name);
+            const lowestPrice = sortedSupermarkets[0].price;
+            const pricePerUnit = quantity > 0 ? lowestPrice / quantity : lowestPrice;
+            productDetails.innerHTML = `
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="md:w-1/3">
+                        <img src="${state.selectedProduct.image}" alt="${state.selectedProduct.name}" class="w-full h-64 object-cover rounded-lg">
+                    </div>
+                    <div class="md:w-2/3">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-2">${state.selectedProduct.name}</h2>
+                        <p class="text-gray-600 mb-4">${state.selectedProduct.description}</p>
+                        <div class="mb-4">
+                            <div class="flex items-center">
+                                <span class="text-3xl font-bold text-green-600">${renderPrice(sortedSupermarkets[0].price)}</span>
+                                ${sortedSupermarkets[0].previousPrice > sortedSupermarkets[0].price ? `<div class="ml-2 flex items-center text-lg text-green-600">↓ ${(((sortedSupermarkets[0].previousPrice - sortedSupermarkets[0].price) / sortedSupermarkets[0].previousPrice) * 100).toFixed(1)}%</div>` : ''}
+                            </div>
+                            <p class="text-sm text-gray-500">En ${sortedSupermarkets[0].name}</p>
+                            <p class="text-sm text-purple-600 mt-1">Precio por ${unit}: ${renderPrice(pricePerUnit)}</p>
+                        </div>
+                        <div class="flex gap-2 mb-4">
+                            <button id="add-to-cart-main" class="flex-1 bg-green-500 text-white py-2 rounded-lg">
+                                Agregar al carrito
+                            </button>
+                            <button id="toggle-favorite-main" class="px-4 py-2 rounded-lg border">
+                                ${isFavorite ? 'En favoritos' : 'Agregar a favoritos'}
+                            </button>
+                        </div>
+                        <!-- Price Alert Section -->
+                        <div class="border-t pt-4">
+                            <h3 class="text-lg font-semibold mb-2">🔔 Alerta de precio automática</h3>
+                            <button id="set-price-alert" class="bg-purple-700 text-white px-4 py-2 rounded-lg w-full">
+                                Activar alerta (precio actual: ${renderPrice(lowestPrice)})
+                            </button>
+                            <p class="text-xs text-gray-500 mt-2">Te avisaremos si el precio baja respecto a este valor</p>
+                        </div>
+                        <!-- Add to Shopping List Button -->
+                        <div class="border-t pt-4">
+                            <h3 class="text-lg font-semibold mb-2">📝 Lista de compras</h3>
+                            <div class="flex gap-2">
+                                <select id="shopping-list-select" class="flex-1 px-3 py-2 border rounded-lg">
+                                    <option value="">Selecciona una lista</option>
+                                    ${state.shoppingLists.map(list => `<option value="${list.id}">${list.name}</option>`).join('')}
+                                </select>
+                                <button id="add-to-shopping-list" class="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                                    Añadir
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            // Add event listeners to main buttons
+            document.getElementById('add-to-cart-main').onclick = () => {
+                addToCart(state.selectedProduct, sortedSupermarkets[0].name);
+            };
+            document.getElementById('toggle-favorite-main').onclick = () => {
+                toggleFavorite(state.selectedProduct);
+            };
+            // Price alert functionality
+            document.getElementById('set-price-alert').onclick = () => {
+                setPriceAlert(state.selectedProduct);
+            };
+            // Add to shopping list functionality
+            document.getElementById('add-to-shopping-list').onclick = () => {
+                const listSelect = document.getElementById('shopping-list-select');
+                const listId = listSelect.value;
+                if (!listId) {
+                    // No list selected — open modal to create/select one and keep selected product pending
+                    askForList(state.selectedProduct);
+                    return;
+                }
+                const existingItem = state.shoppingLists.find(list => list.id === listId).items.find(item => item.id === state.selectedProduct.id);
+                if (existingItem) {
+                    showNotification('Producto ya está en la lista');
+                    return;
+                }
+                const list = state.shoppingLists.find(l => l.id === listId);
+                list.items.push({
+                    ...state.selectedProduct,
+                    purchased: false
+                });
+                showNotification(`Producto añadido a ${list.name}`);
+            };
+            // Populate prices (sorted by price)
+            pricesContainer.innerHTML = '';
+            sortedSupermarkets.forEach((supermarket) => {
+                const priceCard = document.createElement('div');
+                priceCard.className = 'border rounded-lg p-4 mb-4';
+                priceCard.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex items-center">
+                            <img src="${supermarketLogos[supermarket.name] || 'https://placehold.co/40x24/8b5cf6/ffffff?text=' + supermarket.name}" alt="${supermarket.name}" class="w-10 h-6 mr-3">
+                            <div>
+                                <h3 class="font-semibold">${supermarket.name}</h3>
+                                <p class="text-sm text-gray-500">Calificación: ${supermarket.rating} ⭐</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="flex items-center">
+                                <span class="text-2xl font-bold text-green-600">${renderPrice(supermarket.price)}</span>
+                                ${supermarket.previousPrice > supermarket.price ? `<div class="ml-2 text-sm text-green-600">↓ ${(((supermarket.previousPrice - supermarket.price) / supermarket.previousPrice) * 100).toFixed(1)}%</div>` : ''}
+                            </div>
+                            <p class="text-sm text-gray-500 line-through">${renderPrice(supermarket.previousPrice)}</p>
+                            <p class="text-xs text-gray-500">${supermarket.delivery}</p>
+                        </div>
+                    </div>
+                    <button class="add-to-cart-supermarket mt-4 bg-purple-700 text-white px-4 py-2 rounded-lg text-sm w-full" data-supermarket="${supermarket.name}" data-price="${supermarket.price.toFixed(2)}">
+                        Agregar al carrito
+                    </button>
+                `;
+                // Add event listener to add to cart button
+                const addToCartBtn = priceCard.querySelector('.add-to-cart-supermarket');
+                addToCartBtn.onclick = () => {
+                    addToCart(state.selectedProduct, supermarket.name);
+                };
+                pricesContainer.appendChild(priceCard);
+            });
+            showPage('prices-page');
+        }
+        function showCartPage() {
+            if (!state.isLoggedIn) {
+                showLoginPage();
+                return;
+            }
+            const cartContent = document.getElementById('cart-content');
+            if (state.shoppingCart.length === 0) {
+                cartContent.innerHTML = `
+                    <div class="text-center py-12">
+                        <h2 class="text-2xl font-bold text-gray-700 mb-4">Tu carrito está vacío</h2>
+                        <button onclick="showCategoriesPage()" class="bg-purple-700 text-white px-6 py-3 rounded-lg">
+                            Ir a comprar
+                        </button>
+                    </div>
+                `;
+            } else {
+                let cartHtml = '<div class="space-y-6">';
+                state.shoppingCart.forEach(item => {
+                    const supermarket = item.supermarkets.find(s => s.name === item.selectedSupermarket);
+                    const totalPrice = supermarket.price * item.quantity;
+                    cartHtml += `
+                        <div class="border rounded-lg p-4">
+                            <div class="flex items-center gap-4">
+                                <img src="${item.image}" alt="${item.name}" class="w-20 h-20 object-cover rounded">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold">${item.name}</h3>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <div class="flex items-center border rounded">
+                                            <button onclick="updateCartQuantity(${item.id}, '${item.selectedSupermarket}', ${item.quantity - 1})" class="px-2 hover:bg-gray-100">
+                                                -
+                                            </button>
+                                            <span class="px-3">${item.quantity}</span>
+                                            <button onclick="updateCartQuantity(${item.id}, '${item.selectedSupermarket}', ${item.quantity + 1})" class="px-2 hover:bg-gray-100">
+                                                +
+                                            </button>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <span class="text-xl font-bold text-green-600">${renderPrice(supermarket.price)}</span>
+                                            ${supermarket.previousPrice > supermarket.price ? `<div class="ml-2 text-sm text-green-600">↓ ${(((supermarket.previousPrice - supermarket.price) / supermarket.previousPrice) * 100).toFixed(1)}%</div>` : ''}
+                                        </div>
+                                        <div class="font-bold text-green-600">${renderPrice(totalPrice)}</div>
+                                    </div>
+                                    <p class="text-xs text-gray-500">En ${item.selectedSupermarket}</p>
+                                </div>
+                                <button onclick="updateCartQuantity(${item.id}, '${item.selectedSupermarket}', 0)" class="text-red-500 hover:text-red-700">
+                                    ×
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                // Calculate total
+                const total = state.shoppingCart.reduce((sum, item) => {
+                    const supermarket = item.supermarkets.find(s => s.name === item.selectedSupermarket);
+                    return sum + (supermarket.price * item.quantity);
+                }, 0);
+                cartHtml += `
+                    <div class="border-t pt-4">
+                        <div class="flex justify-between items-center text-xl font-bold">
+                            <span>Total:</span>
+                            <span class="text-green-600">${renderPrice(total)}</span>
+                        </div>
+                    </div>
+                `;
+                cartContent.innerHTML = cartHtml;
+            }
+            showPage('cart-page');
+        }
+        function showFavoritesPage() {
+            if (!state.isLoggedIn) {
+                showLoginPage();
+                return;
+            }
+            const favoritesContent = document.getElementById('favorites-content');
+            if (state.favorites.length === 0) {
+                favoritesContent.innerHTML = `
+                    <div class="text-center py-12">
+                        <h2 class="text-2xl font-bold text-gray-700 mb-4">No tienes favoritos</h2>
+                        <button onclick="showCategoriesPage()" class="bg-purple-700 text-white px-6 py-3 rounded-lg">
+                            Explorar productos
+                        </button>
+                    </div>
+                `;
+            } else {
+                let favoritesHtml = '<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">';
+                // Map favorites to include pricePerUnit for consistent display
+                const favoritesWithPricePerUnit = state.favorites.map(product => {
+                    const { quantity, unit } = extractQuantity(product.name);
+                    const lowestPrice = Math.min(...product.supermarkets.map(s => s.price));
+                    const pricePerUnit = quantity > 0 ? lowestPrice / quantity : lowestPrice;
+                    return { ...product, pricePerUnit, quantity, unit };
+                }).sort((a, b) => a.pricePerUnit - b.pricePerUnit);
+                favoritesWithPricePerUnit.forEach(product => {
+                    const lowestPrice = Math.min(...product.supermarkets.map(s => s.price));
+                    const lowestSupermarket = product.supermarkets.find(s => s.price === lowestPrice);
+                    const isFavorite = true; // Since it's in favorites
+                    // NUEVO: Verificar si hay alerta activa
+                    const hasAlert = state.priceAlerts.some(alert => alert.productId === product.id);
+                    // Calculate savings
+                    const highestPrice = Math.max(...product.supermarkets.map(s => s.price));
+                    const savings = highestPrice - lowestPrice;
+                    // Calculate price bar width
+                    const maxPrice = Math.max(...favoritesWithPricePerUnit.map(p => Math.min(...p.supermarkets.map(s => s.price))));
+                    const priceBarWidth = maxPrice > 0 ? (lowestPrice / maxPrice) * 100 : 0;
+                    favoritesHtml += `
+                        <div class="product-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group w-full">
+                            <div class="relative">
+                                <img src="${product.image}" alt="${product.name}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300 cursor-pointer">
+                                <div class="absolute top-2 right-2 flex flex-col gap-1">
+                                    ${lowestSupermarket.previousPrice > lowestPrice ? `<span class="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">OFERTA</span>` : ''}
+                                </div>
+                                <button class="favorite-btn absolute top-2 left-2 p-2 rounded-full transition duration-300 bg-red-500 text-white hover:bg-red-600">
+                                    ❤️
+                                </button>
+                                <!-- NUEVO: Botón de alerta en la esquina inferior derecha -->
+                                <button class="alert-btn absolute bottom-2 right-2 p-2 rounded-full transition duration-300 ${hasAlert ? 'bg-blue-500 text-white hover:bg-blue-600' : 'bg-white bg-opacity-80 text-gray-700 hover:bg-opacity-100'}">
+                                    ${hasAlert ? '🔔' : '🔕'}
+                                </button>
+                            </div>
+                            <div class="p-4">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h3 class="font-bold text-gray-800 text-sm line-clamp-2">${product.name}</h3>
+                                    <div class="flex items-center">
+                                        <span class="text-yellow-500 text-sm font-bold">${product.rating}</span>
+                                    </div>
+                                </div>
+                                <p class="text-gray-600 text-xs mb-3 line-clamp-2">${product.description}</p>
+                                <div class="mb-3">
+                                    <div class="flex items-center">
+                                        <span class="text-xl font-bold text-green-600">${renderPrice(lowestPrice)}</span>
+                                        ${lowestSupermarket.previousPrice > lowestPrice ? `<div class="ml-2 flex items-center text-sm text-green-600">↓ ${(((lowestSupermarket.previousPrice - lowestPrice) / lowestSupermarket.previousPrice) * 100).toFixed(1)}%</div>` : ''}
+                                    </div>
+                                    <p class="text-xs text-gray-500">En ${lowestSupermarket.name}</p>
+                                    <p class="text-xs text-purple-600 mt-1">Precio por ${product.unit}: ${renderPrice(product.pricePerUnit)}</p>
+                                    ${savings > 0 ? `<p class="text-xs text-blue-600 mt-1">Ahorras ${renderPrice(savings)} vs. el más caro</p>` : ''}
+                                    <div class="mt-2 w-full bg-gray-200 rounded-full h-2">
+                                        <div class="price-bar" style="width: ${priceBarWidth}%;"></div>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="view-prices-btn flex-1 bg-purple-700 text-white py-2 px-3 rounded-lg font-semibold hover:bg-purple-800 transition duration-300 text-sm">
+                                        Ver supermercados
+                                    </button>
+                                    <button class="add-to-cart-btn bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition duration-300">
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                favoritesHtml += '</div>';
+                favoritesContent.innerHTML = favoritesHtml;
+                // Add event listeners to all product cards
+                document.querySelectorAll('.product-card img').forEach((img, index) => {
+                    img.onclick = () => {
+                        state.selectedProduct = favoritesWithPricePerUnit[index];
+                        showPricesPage();
+                    };
+                });
+                document.querySelectorAll('.view-prices-btn').forEach((btn, index) => {
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        state.selectedProduct = favoritesWithPricePerUnit[index];
+                        showPricesPage();
+                    };
+                });
+                document.querySelectorAll('.add-to-cart-btn').forEach((btn, index) => {
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        const lowestSupermarket = favoritesWithPricePerUnit[index].supermarkets.reduce((prev, curr) => prev.price < curr.price ? prev : curr);
+                        addToCart(favoritesWithPricePerUnit[index], lowestSupermarket.name);
+                    };
+                });
+                document.querySelectorAll('.favorite-btn').forEach((btn, index) => {
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleFavorite(favoritesWithPricePerUnit[index]);
+                    };
+                });
+                // NUEVO: Agregar listeners para los botones de alerta en favoritos
+                document.querySelectorAll('.alert-btn').forEach((btn, index) => {
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        toggleAlert(favoritesWithPricePerUnit[index]);
+                    };
+                });
+            }
+            showPage('favorites-page');
+        }
+        // Shopping Lists Functions
+        function showShoppingListsPage() {
+            if (!state.isLoggedIn) {
+                showLoginPage();
+                return;
+            }
+            const listsContent = document.getElementById('shopping-lists-content');
+            if (state.shoppingLists.length === 0) {
+                listsContent.innerHTML = `
+                    <div class="text-center py-12">
+                        <h2 class="text-2xl font-bold text-gray-700 mb-4">No tienes listas de compras</h2>
+                        <button onclick="createNewShoppingList()" class="bg-green-500 text-white px-6 py-3 rounded-lg">
+                            + Crear primera lista
+                        </button>
+                    </div>
+                `;
+            } else {
+                const container = document.createElement('div');
+                container.className = 'space-y-4';
+                container.id = 'shopping-lists-container';
+                state.shoppingLists.forEach(list => {
+                    const purchasedCount = list.items.filter(item => item.purchased).length;
+                    const totalCount = list.items.length;
+                    const listDiv = document.createElement('div');
+                    listDiv.className = 'border rounded-lg p-4';
+                    listDiv.dataset.listId = list.id;
+                    listDiv.innerHTML = `
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-xl font-bold text-gray-800">${list.name}</h3>
+                            <span class="text-sm text-gray-500">${purchasedCount}/${totalCount} productos</span>
+                        </div>
+                        <div class="mt-4 flex gap-2">
+                            <button class="view-list-btn bg-purple-700 text-white px-4 py-2 rounded-lg">
+                                Ver lista
+                            </button>
+                            <button class="delete-list-btn bg-red-500 text-white px-4 py-2 rounded-lg">
+                                Eliminar
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(listDiv);
+                });
+                listsContent.innerHTML = '';
+                listsContent.appendChild(container);
+                // Event delegation
+                const containerEl = document.getElementById('shopping-lists-container');
+                containerEl.addEventListener('click', (e) => {
+                    const listDiv = e.target.closest('[data-list-id]');
+                    if (!listDiv) return;
+                    const listId = listDiv.dataset.listId;
+                    if (e.target.classList.contains('view-list-btn')) {
+                        showShoppingListDetail(listId);
+                    } else if (e.target.classList.contains('delete-list-btn')) {
+                        deleteShoppingList(listId);
+                    }
+                });
+            }
+            showPage('shopping-lists-page');
+        }
+        function showShoppingListDetail(listId) {
+            state.currentListId = listId;
+            const list = state.shoppingLists.find(l => l.id === listId);
+            const detailContent = document.getElementById('shopping-list-detail-content');
+            const title = document.getElementById('list-detail-title');
+            title.textContent = list.name;
+            if (list.items.length === 0) {
+                detailContent.innerHTML = `
+                    <div class="text-center py-12">
+                        <h2 class="text-2xl font-bold text-gray-700 mb-4">Esta lista está vacía</h2>
+                        <p class="text-gray-500 mb-6">Agrega productos desde la página de categorías</p>
+                        <button onclick="showCategoriesPage()" class="bg-purple-700 text-white px-6 py-3 rounded-lg">
+                            Ir a comprar
+                        </button>
+                    </div>
+                `;
+            } else {
+                let itemsHtml = '<div class="space-y-4">';
+                list.items.forEach(item => {
+                    // Get current prices
+                    const currentLowestPrice = Math.min(...item.supermarkets.map(s => s.price));
+                    const currentLowestSupermarket = item.supermarkets.find(s => s.price === currentLowestPrice);
+                    const { quantity, unit } = extractQuantity(item.name);
+                    const pricePerUnit = quantity > 0 ? currentLowestPrice / quantity : currentLowestPrice;
+                    itemsHtml += `
+                        <div class="border rounded-lg p-4">
+                            <div class="flex items-center gap-4">
+                                <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
+                                <div class="flex-1">
+                                    <h3 class="font-semibold">${item.name}</h3>
+                                    <p class="text-sm text-gray-600">${item.description}</p>
+                                    <div class="mt-2">
+                                        <div class="flex items-center">
+                                            <span class="text-lg font-bold text-green-600">${renderPrice(currentLowestPrice)}</span>
+                                            <span class="text-sm text-gray-500 ml-2">en ${currentLowestSupermarket.name}</span>
+                                        </div>
+                                        <p class="text-xs text-purple-600">Precio por ${unit}: ${renderPrice(pricePerUnit)}</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="checkbox" ${item.purchased ? 'checked' : ''} onchange="togglePurchased('${listId}', ${item.id})" class="w-5 h-5">
+                                    <button onclick="removeFromShoppingList('${listId}', ${item.id})" class="text-red-500 hover:text-red-700">
+                                        ×
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                itemsHtml += '</div>';
+                detailContent.innerHTML = itemsHtml;
+            }
+            showPage('shopping-list-detail-page');
+        }
+        function createNewShoppingList() {
+            askForList(null); // null indicates no product, just create list
+        }
+        function deleteShoppingList(listId) {
+            if (confirm('¿Estás seguro de eliminar esta lista?')) {
+                state.shoppingLists = state.shoppingLists.filter(list => list.id !== listId);
+                showNotification('Lista eliminada');
+                showShoppingListsPage();
+            }
+        }
+        function togglePurchased(listId, productId) {
+            const list = state.shoppingLists.find(l => l.id === listId);
+            const item = list.items.find(i => i.id === productId);
+            item.purchased = !item.purchased;
+            showNotification(item.purchased ? 'Producto marcado como comprado' : 'Producto desmarcado');
+            // Refresh the detail page if we're on it
+            if (state.currentPage === 'shopping-list-detail' && state.currentListId === listId) {
+                showShoppingListDetail(listId);
+            }
+        }
+        function removeFromShoppingList(listId, productId) {
+            const list = state.shoppingLists.find(l => l.id === listId);
+            list.items = list.items.filter(item => item.id !== productId);
+            showNotification('Producto eliminado de la lista');
+            // Refresh the detail page if we're on it
+            if (state.currentPage === 'shopping-list-detail' && state.currentListId === listId) {
+                showShoppingListDetail(listId);
+            }
+        }
+        // Cart and favorites management
+        function toggleFavorite(product) {
+            const isFavorite = state.favorites.some(item => item.id === product.id);
+            if (isFavorite) {
+                state.favorites = state.favorites.filter(item => item.id !== product.id);
+                showNotification('Producto eliminado de favoritos');
+            } else {
+                state.favorites.push(product);
+                showNotification('Producto agregado a favoritos');
+            }
+            // Update UI if we're on the prices page
+            if (state.currentPage === 'prices') {
+                const isNowFavorite = state.favorites.some(item => item.id === product.id);
+                document.getElementById('favorite-toggle').innerHTML = isNowFavorite ? '❤️' : '🤍';
+                document.getElementById('toggle-favorite-main').innerHTML = isNowFavorite ? 'En favoritos' : 'Agregar a favoritos';
+            }
+        }
+        function addToCart(product, supermarketName) {
+            const existingItem = state.shoppingCart.find(item => item.id === product.id && item.selectedSupermarket === supermarketName);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                state.shoppingCart.push({ 
+                    ...product, 
+                    quantity: 1, 
+                    selectedSupermarket: supermarketName 
+                });
+            }
+            showNotification(`${product.name} agregado al carrito desde ${supermarketName}`);
+        }
+        function updateCartQuantity(productId, supermarket, newQuantity) {
+            if (newQuantity <= 0) {
+                state.shoppingCart = state.shoppingCart.filter(item => !(item.id === productId && item.selectedSupermarket === supermarket));
+                showNotification('Producto eliminado del carrito');
+            } else {
+                const item = state.shoppingCart.find(item => item.id === productId && item.selectedSupermarket === supermarket);
+                if (item) {
+                    item.quantity = newQuantity;
+                }
+            }
+            // Refresh cart page if we're on it
+            if (state.currentPage === 'cart') {
+                showCartPage();
+            }
+        }
+        // Auth functions
+        function handleRegister(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const name = formData.get('name');
+            const email = formData.get('email');
+            state.isLoggedIn = true;
+            state.user = { name, email };
+            showNotification('¡Bienvenido!');
+            showCategoriesPage();
+        }
+        function handleLogin(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const email = formData.get('email');
+            state.isLoggedIn = true;
+            state.user = { name: 'Usuario', email };
+            showNotification('¡Bienvenido de nuevo!');
+            showCategoriesPage();
+            // Check price alerts on login
+            checkPriceAlerts();
+        }
+        function logout() {
+            state.isLoggedIn = false;
+            state.user = null;
+            state.shoppingCart = [];
+            state.favorites = [];
+            state.priceAlerts = [];
+            state.shoppingLists = [];
+            state.currentListId = null;
+            showLandingPage();
+        }
+        // Modal and list helper functions
+        window.pendingProductForList = null;
+        function askForList(product) {
+            window.pendingProductForList = product || null;
+            populateExistingLists();
+            document.getElementById("select-list-modal").classList.remove("hidden");
+        }
+        function closeListModal() {
+            window.pendingProductForList = null;
+            document.getElementById("select-list-modal").classList.add("hidden");
+        }
+        function populateExistingLists() {
+            const selectModal = document.getElementById("existing-lists");
+            const selectSimple = document.getElementById("shopping-list-select");
+            if (selectModal) {
+                selectModal.innerHTML = '<option value="">-- Selecciona una lista --</option>';
+                state.shoppingLists.forEach(list => {
+                    const opt = document.createElement("option");
+                    opt.value = list.id;
+                    opt.textContent = list.name;
+                    selectModal.appendChild(opt);
+                });
+            }
+            if (selectSimple) {
+                // update the existing select used on product page too
+                selectSimple.innerHTML = '<option value="">-- Selecciona una lista --</option>';
+                state.shoppingLists.forEach(list => {
+                    const opt = document.createElement("option");
+                    opt.value = list.id;
+                    opt.textContent = list.name;
+                    selectSimple.appendChild(opt);
+                });
+            }
+        }
+        function createListFromModal() {
+            const nameInput = document.getElementById("new-list-name");
+            const name = nameInput.value.trim();
+            if (!name) {
+                showNotification("El nombre de la lista no puede estar vacío");
+                return;
+            }
+            const newList = { id: Date.now().toString(), name, items: [] };
+            state.shoppingLists.push(newList);
+            state.currentListId = newList.id;
+            populateExistingLists();
+            nameInput.value = "";
+            showNotification("Lista creada correctamente");
+        }
+        function confirmListSelection() {
+            const select = document.getElementById("existing-lists");
+            const listId = select ? select.value || state.currentListId : state.currentListId;
+            if (!listId) {
+                showNotification("Debes seleccionar o crear una lista");
+                return;
+            }
+            state.currentListId = listId;
+            // if we have a pending product, add it
+            if (window.pendingProductForList) {
+                const list = state.shoppingLists.find(l => l.id == listId);
+                if (!list) {
+                    showNotification("Lista no encontrada");
+                    closeListModal();
+                    return;
+                }
+                const exists = list.items.find(item => item.id === window.pendingProductForList.id);
+                if (exists) {
+                    showNotification("Producto ya está en la lista");
+                } else {
+                    list.items.push({ ...window.pendingProductForList, purchased: false });
+                    showNotification("Producto añadido a la lista");
+                }
+            }
+            closeListModal();
+        }
+        // New function for automatic price alerts
+        function setPriceAlert(product) {
+            const lowestPrice = Math.min(...product.supermarkets.map(s => s.price));
+            // Remove alerta previa si existe
+            state.priceAlerts = state.priceAlerts.filter(a => a.productId !== product.id);
+            // Guardar alerta con el precio actual como referencia
+            state.priceAlerts.push({
+                productId: product.id,
+                targetPrice: lowestPrice
+            });
+            showNotification(`Alerta activada a ${renderPrice(lowestPrice)}. Te avisaremos si baja.`);
+            // NUEVO: Actualizar el badge de alertas
+            updateAlertsBadge();
+        }
+        // NUEVO: función para encontrar producto por ID
+        function findProductById(id) {
+            const allProducts = getAllProducts();
+            return allProducts.find(p => p.id === id);
+        }
+        // NUEVO: Actualizar el badge del ícono de alertas
+        function updateAlertsBadge() {
+            const badge = document.getElementById('alerts-badge');
+            const count = state.priceAlerts.length;
+            if (count > 0) {
+                badge.textContent = count > 9 ? '9+' : count;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+        // NUEVO: Abrir página de alertas desde el panel
+        function openAlertsPage() {
+            toggleAlertsPanel(); // cierra el panel
+            showAlertsPage();
+        }
+        // NUEVO: Limpiar todas las alertas
+        function clearAllAlerts() {
+            if (state.priceAlerts.length === 0) return;
+            if (confirm('¿Eliminar todas las alertas de precio?')) {
+                state.priceAlerts = [];
+                showNotification('Todas las alertas han sido eliminadas');
+                renderAlertsPanel();
+                updateAlertsBadge();
+            }
+        }
+        // NUEVO: Renderizar el panel flotante de alertas
+        function renderAlertsPanel() {
+            const listContainer = document.getElementById('cp-alerts-list');
+            if (!listContainer) return;
+            if (state.priceAlerts.length === 0) {
+                listContainer.innerHTML = '<p class="text-gray-500 text-center py-2">No hay alertas activas</p>';
+                return;
+            }
+            listContainer.innerHTML = state.priceAlerts.map(alert => {
+                const product = findProductById(alert.productId);
+                if (!product) return '';
+                const currentLowest = Math.min(...product.supermarkets.map(s => s.price));
+                const diff = alert.targetPrice - currentLowest;
+                const isBelow = currentLowest < alert.targetPrice;
+                return `
+                    <div class="border-b pb-2">
+                        <div class="flex justify-between">
+                            <span class="font-medium text-sm">${product.name}</span>
+                            <button onclick="toggleAlert(${product.id})" class="text-red-500 text-xs">✕</button>
+                        </div>
+                        <div class="text-xs text-gray-600 mt-1">
+                            Alerta: ${renderPrice(alert.targetPrice)} | Actual: ${renderPrice(currentLowest)}
+                            ${isBelow ? '<span class="text-green-600 ml-1">¡Bajó!</span>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        // NUEVO: función toggleAlert
+        function toggleAlert(productOrId) {
+            let product = typeof productOrId === "object" ? productOrId : findProductById(Number(productOrId));
+            if (!product) return;
+            const existing = state.priceAlerts.find(a => a.productId === product.id);
+            if (existing) {
+                state.priceAlerts = state.priceAlerts.filter(a => a.productId !== product.id);
+                showNotification("Alerta eliminada para " + product.name);
+            } else {
+                setPriceAlert(product);
+                return; // ya actualizó badge y panel
+            }
+            updateAlertsBadge();
+            renderAlertsPanel();
+        }
+        // NUEVO: función showAlertsPage actualizada
+        function showAlertsPage() {
+            if (!state.isLoggedIn) {
+                showLoginPage();
+                return;
+            }
+            const alertsContent = document.getElementById('alerts-content');
+            if (!state.priceAlerts || state.priceAlerts.length === 0) {
+                alertsContent.innerHTML = `
+                    <div class="text-center py-12">
+                        <h2 class="text-2xl font-bold text-gray-700 mb-4">No tienes alertas</h2>
+                        <button onclick="showCategoriesPage()" class="bg-purple-700 text-white px-6 py-3 rounded-lg">
+                            Explorar productos
+                        </button>
+                    </div>
+                `;
+                showPage('alerts-page');
+                return;
+            }
+            alertsContent.innerHTML = state.priceAlerts.map(a => {
+                const prod = findProductById(a.productId);
+                if (!prod) return '';
+                const lowest = Math.min(...prod.supermarkets.map(s => s.price));
+                return `
+                    <div class="flex justify-between items-center border-b py-4">
+                        <div class="flex items-center gap-3">
+                            <img src="${prod.image}" class="w-16 h-16 rounded object-cover" />
+                            <div>
+                                <h3 class="font-semibold">${prod.name}</h3>
+                                <p class="text-sm text-gray-500">Precio actual: ${renderPrice(lowest)}</p>
+                            </div>
+                        </div>
+                        <button onclick="toggleAlert(${prod.id})"
+                                class="text-xs px-3 py-1 bg-red-500 text-white rounded">
+                            Quitar
+                        </button>
+                    </div>
+                `;
+            }).join('');
+            showPage('alerts-page');
+        }
+        // NUEVO: función toggleAlertsPanel
+        function toggleAlertsPanel() {
+            const panel = document.getElementById("cp-alerts-panel");
+            if (panel) {
+                panel.classList.toggle("hidden");
+                if (!panel.classList.contains("hidden")) {
+                    renderAlertsPanel();
+                }
+            }
+        }
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', function() {
+            showLandingPage();
+            updateAlertsBadge(); // inicializar badge
+        });
+    </script>
+
+<!-- PRICE HISTORY MODAL & CHART LOGIC (injected) -->
+<div id="price-history-modal" class="cp-chart-modal hidden" aria-hidden="true" role="dialog" aria-modal="true">
+  <div class="cp-chart-card">
+    <div class="flex justify-between items-center mb-4">
+      <h3 id="price-history-title" class="text-xl font-semibold">Historial de precios</h3>
+      <button id="price-history-close" class="px-3 py-1 rounded bg-gray-200 hover:bg-gray-300">Cerrar ✕</button>
+    </div>
+    <div class="mb-3 text-sm text-gray-600">Comparación de precios históricos por supermercado (simulados).</div>
+    <div style="position:relative; width:100%; height:420px;">
+      <canvas id="price-history-canvas"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Utility: format last N days labels (dd/mm)
+  function lastNDates(n) {
+    const arr = [];
+    const today = new Date();
+    for (let i = n-1; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      arr.push(("0"+d.getDate()).slice(-2) + "/" + ("0"+(d.getMonth()+1)).slice(-2));
+    }
+    return arr;
+  }
+
+  // Simulate historical price series for each supermarket of a product.
+  // Uses a random-walk around current price to produce plausible fluctuations.
+  function simulatePriceHistoryForProduct(product, days = 30) {
+    const labels = lastNDates(days);
+    const datasets = [];
+    // choose slightly different seeds per supermarket
+    (product.supermarkets || []).forEach((s, idx) => {
+      const start = Number(s.price) || 0;
+      let value = start;
+      const data = [];
+      // random walk parameters
+      const volatility = Math.max(0.002, (start * 0.01)); // up to 1% typical daily var scaled
+      for (let i = 0; i < days; i++) {
+        // simulate small daily change - normal-like via two uniform draws
+        const change = (Math.random() - 0.5) * 2 * volatility;
+        value = Math.max(0.01, value + change);
+        // occasionally introduce a promotional dip
+        if (Math.random() < 0.03) value = Math.max(0.01, value * (0.9 + Math.random()*0.08));
+        data.push(parseFloat(value.toFixed(2)));
+      }
+      datasets.push({
+        label: s.name + ' ($' + start.toFixed(2) + ')',
+        data,
+        fill: false,
+        tension: 0.25,
+        pointRadius: 2,
+        borderWidth: 2,
+        // borderColor and backgroundColor left undefined to let Chart.js pick defaults (but we set via rgba for variety)
+        backgroundColor: `rgba(${50 + idx*40 % 200}, ${100 + idx*20 % 155}, ${150 + idx*30 % 100}, 0.9)`,
+        borderColor: `rgba(${50 + idx*40 % 200}, ${100 + idx*20 % 155}, ${150 + idx*30 % 100}, 0.9)`
+      });
+    });
+    return { labels, datasets };
+  }
+
+  // Manage modal + Chart instance
+  let priceHistoryChart = null;
+  function destroyChart() {
+    if (priceHistoryChart) {
+      try { priceHistoryChart.destroy(); } catch(e){/*ignore*/ }
+      priceHistoryChart = null;
+    }
+  }
+
+  function openPriceHistoryModal(product) {
+    if (!product) return alert('No hay producto seleccionado');
+    const modal = document.getElementById('price-history-modal');
+    const title = document.getElementById('price-history-title');
+    title.textContent = 'Historial (simulado) — ' + product.name;
+    // simulate data
+    const result = simulatePriceHistoryForProduct(product, 30);
+    const ctx = document.getElementById('price-history-canvas').getContext('2d');
+    destroyChart();
+    priceHistoryChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: result.labels,
+        datasets: result.datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: { mode: 'index', intersect: false }
+        },
+        scales: {
+          y: {
+            ticks: {
+              callback: function(value){ return '$' + value; }
+            },
+            beginAtZero: false
+          }
+        }
+      }
+    });
+    modal.classList.remove('hidden');
+    modal.setAttribute('aria-hidden','false');
+  }
+
+  function closePriceHistoryModal() {
+    const modal = document.getElementById('price-history-modal');
+    destroyChart();
+    modal.classList.add('hidden');
+    modal.setAttribute('aria-hidden','true');
+  }
+
+  // Attach close behavior
+  document.addEventListener('click', function(e){
+    if (e.target && e.target.id === 'price-history-close') {
+      closePriceHistoryModal();
+    }
+    // click outside modal content closes it
+    if (e.target && e.target.id === 'price-history-modal') {
+      closePriceHistoryModal();
+    }
+  });
+
+  // Observe product-details container and inject "Ver historial" button each time product details are rendered.
+  function ensureHistoryButton() {
+    const container = document.getElementById('product-details');
+    if (!container) return;
+    // create button if not present
+    if (!document.getElementById('view-history-btn')) {
+      const btn = document.createElement('button');
+      btn.id = 'view-history-btn';
+      btn.className = 'ml-2 px-4 py-2 rounded-lg border hover:bg-gray-100 text-sm';
+      btn.textContent = '📈 Ver historial';
+      // append to the actions area if possible, otherwise at end
+      // try to insert after the existing action buttons container
+      const actions = container.querySelector('.flex.gap-2.mb-4, .flex.gap-2') || container;
+      actions.appendChild(btn);
+      btn.addEventListener('click', function(e){
+        e.stopPropagation();
+        if (!state.selectedProduct) return alert('Seleccione un producto primero');
+        openPriceHistoryModal(state.selectedProduct);
+      });
+    }
+  }
+
+  // Start MutationObserver
+  const prodDetails = document.getElementById('product-details');
+  if (prodDetails) {
+    const mo = new MutationObserver((mutations) => {
+      ensureHistoryButton();
+    });
+    mo.observe(prodDetails, {childList:true, subtree:true});
+  }
+  // Also run once on load in case content already present
+  document.addEventListener('DOMContentLoaded', ensureHistoryButton);
+})();
+</script>
+<!-- END INJECTION -->
+
+
+<!-- INJECTED SCRIPTS: renderProducts, filters, dynamic supermarket options, price-history modal hookup -->
+<script>
+(function(){
+  // Ensure products available as state.products or products object
+  if (typeof state === "undefined") window.state = {};
+  if (!state.products) {
+    state.products = [];
+    if (typeof products !== "undefined") {
+      for (const key in products) {
+        if (Array.isArray(products[key])) {
+          state.products = state.products.concat(products[key]);
+        } else if (typeof products[key] === "object") {
+          for (const sub in products[key]) {
+            if (Array.isArray(products[key][sub])) {
+              state.products = state.products.concat(products[key][sub]);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Populate supermarket filter dynamically
+  function populateSupermarkets() {
+    const sel = document.getElementById('filter-supermarket');
+    if (!sel) return;
+    const set = new Set();
+    state.products.forEach(p => {
+      if (Array.isArray(p.supermarkets)) p.supermarkets.forEach(s => set.add(s.name));
+    });
+    // Clear existing non-empty options
+    sel.querySelectorAll('option:not([value=""])').forEach(o => o.remove());
+    Array.from(set).sort().forEach(name => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      sel.appendChild(opt);
+    });
+  }
+
+  // Helpers
+  function getLowestPrice(product){ return Math.min(...product.supermarkets.map(s=>s.price)); }
+  function getMaxDiscount(product){ return Math.max(...product.supermarkets.map(s=> (s.previousPrice||s.price)-s.price)); }
+
+  // Render products using QWEN1 card styling (approximate template from file)
+  window.renderProducts = function(productList){
+    const container = document.getElementById('products-container') || document.getElementById('products-list') || document.getElementById('products-grid');
+    if (!container) return;
+    container.innerHTML = '';
+    if (!Array.isArray(productList)) productList = [];
+
+    productList.forEach(product => {
+      // compute values
+      const lowestPrice = getLowestPrice(product);
+      const lowestSupermarket = product.supermarkets.find(s=>s.price===lowestPrice) || {name:'--', price: lowestPrice};
+      const highestPrice = Math.max(...product.supermarkets.map(s=>s.price));
+      const savings = (highestPrice - lowestPrice) || 0;
+
+      // card
+      const productCard = document.createElement('div');
+      productCard.className = 'product-card bg-white rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden group w-full';
+      productCard.style.cursor = 'pointer';
+
+      // image block (keeps original classes used in QWEN1)
+      const imgHtml = `
+        <div class="relative">
+          <img src="${product.image || ''}" alt="${product.name || ''}" class="w-full h-56 object-cover group-hover:scale-105 transition duration-300 cursor-pointer">
+          <div class="absolute top-2 right-2 flex flex-col gap-1">
+            ${ (lowestSupermarket.previousPrice && lowestSupermarket.previousPrice > lowestSupermarket.price) ? `<span class="bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">OFERTA</span>` : '' }
+          </div>
+        </div>
+      `;
+
+      // content block
+      const contentHtml = `
+        <div class="p-4">
+          <div class="flex justify-between items-start mb-2">
+            <h3 class="font-bold text-gray-800 text-sm line-clamp-2">${product.name || ''}</h3>
+            <div class="flex items-center">
+              <span class="text-yellow-500 text-sm font-bold">${product.rating || ''}</span>
+            </div>
+          </div>
+          <p class="text-gray-600 text-xs mb-3 line-clamp-2">${product.brand || ''}</p>
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="font-semibold text-green-700 text-lg">${renderPrice(lowestPrice)}</p>
+              <p class="text-xs text-gray-500">En ${lowestSupermarket.name}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm text-gray-600">Ahorra</p>
+              <p class="font-bold text-sm text-red-500">${savings.toFixed(2)}</p>
+            </div>
+          </div>
+          <div class="mt-3 flex gap-2">
+            <button class="history-btn px-3 py-1 bg-blue-500 text-white rounded text-sm">📈 Historial</button>
+            <button class="favorite-btn px-3 py-1 border rounded text-sm">❤️</button>
+            <button class="alert-btn px-3 py-1 border rounded text-sm">🔔</button>
+          </div>
+        </div>
+      `;
+
+      productCard.innerHTML = imgHtml + contentHtml;
+
+      // click handlers
+      productCard.querySelector('.history-btn').onclick = (e) => {
+        e.stopPropagation();
+        openPriceHistoryModalByProduct(product);
+      };
+      productCard.querySelector('.favorite-btn').onclick = (e) => { e.stopPropagation(); toggleFavorite && toggleFavorite(product); };
+      productCard.querySelector('.alert-btn').onclick = (e) => { e.stopPropagation(); toggleAlert && toggleAlert(product); };
+
+      productCard.onclick = () => {
+        state.selectedProduct = product;
+        if (typeof showPricesPage === 'function') showPricesPage();
+      };
+
+      container.appendChild(productCard);
+    });
+  };
+
+  // Filters functions
+  window.applyFilters = function() {
+    const min = parseFloat(document.getElementById("min-price").value) || 0;
+    const max = parseFloat(document.getElementById("max-price").value) || Infinity;
+    const supermarket = document.getElementById("filter-supermarket").value.trim();
+    const brand = document.getElementById("filter-brand").value.trim().toLowerCase();
+    const ratingMin = parseFloat(document.getElementById("filter-rating").value) || 0;
+    const sortBy = document.getElementById("sort-by").value;
+
+    // Usar la lista de la categoría actual si existe, o todo el catálogo como respaldo
+    const sourceList = (state.currentProductList && state.currentProductList.length > 0)
+        ? state.currentProductList
+        : state.products;
+
+    let filtered = sourceList.filter(p => {
+        const lowest = getLowestPrice(p);
+        let ok = (lowest >= min && lowest <= max);
+        if (supermarket) ok = ok && p.supermarkets && p.supermarkets.some(s => s.name === supermarket);
+        if (brand) ok = ok && (p.brand || '').toLowerCase().includes(brand);
+        if (ratingMin) ok = ok && (p.rating || 0) >= ratingMin;
+        return ok;
+    });
+
+    switch(sortBy){
+        case 'priceLow': filtered.sort((a,b)=> getLowestPrice(a)-getLowestPrice(b)); break;
+        case 'savings': filtered.sort((a,b)=> getMaxDiscount(b)-getMaxDiscount(a)); break;
+        case 'rating': filtered.sort((a,b)=> (b.rating||0)-(a.rating||0)); break;
+        case 'recent':
+            filtered.forEach(p=>{ if(!p.dateAdded) p.dateAdded = new Date(Date.now()-Math.random()*30*24*60*60*1000); });
+            filtered.sort((a,b)=> new Date(b.dateAdded) - new Date(a.dateAdded));
+            break;
+    }
+
+    renderProducts(filtered);
+};
+
+  window.resetFilters = function(){
+    document.getElementById("min-price").value = '';
+    document.getElementById("max-price").value = '';
+    document.getElementById("filter-supermarket").value = '';
+    document.getElementById("filter-brand").value = '';
+    document.getElementById("filter-rating").value = '';
+    document.getElementById("sort-by").value = 'priceLow';
+    renderProducts(state.products);
+  };
+
+  // Hook buttons
+  document.addEventListener('DOMContentLoaded', function(){
+    populateSupermarkets();
+    // attach apply/reset to buttons if exist
+    const applyBtn = document.getElementById('apply-filters-btn');
+    const resetBtn = document.getElementById('reset-filters-btn');
+    if (applyBtn) applyBtn.addEventListener('click', applyFilters);
+    if (resetBtn) resetBtn.addEventListener('click', resetFilters);
+    // initial render (if products exist)
+    if (state.products && state.products.length) renderProducts(state.products);
+  });
+
+  // PRICE HISTORY modal functions (reuse Chart.js)
+  let priceHistoryChart = null;
+  function simulateHistory(product, days=30){
+    const labels = [];
+    const datasets = [];
+    const today = new Date();
+    for (let i=days-1;i>=0;i--){
+      const d = new Date(today); d.setDate(d.getDate()-i);
+      labels.push(("0"+d.getDate()).slice(-2)+"/"+("0"+(d.getMonth()+1)).slice(-2));
+    }
+    product.supermarkets.forEach((s, idx) => {
+      let val = s.price;
+      const data = [];
+      for(let i=0;i<days;i++){ val = Math.max(0.01, val*(0.98+Math.random()*0.04)); data.push(parseFloat(val.toFixed(2))); }
+      datasets.push({ label: s.name, data, fill:false, tension:0.25, borderColor:`hsl(${idx*80},70%,50%)`, backgroundColor:`hsl(${idx*80},70%,50%)` });
+    });
+    return { labels, datasets };
+  }
+
+  window.openPriceHistoryModalByProduct = function(product){
+    const modal = document.getElementById('price-history-modal');
+    if(!modal) return;
+    const title = document.getElementById('price-history-title');
+    title.textContent = 'Historial: ' + (product.name || '');
+    const ctx = document.getElementById('price-history-canvas').getContext('2d');
+    if (priceHistoryChart) { try{ priceHistoryChart.destroy(); }catch(e){} priceHistoryChart=null; }
+    const data = simulateHistory(product, 30);
+    priceHistoryChart = new Chart(ctx, { type:'line', data: data, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} } } });
+    modal.classList.remove('hidden');
+  };
+
+  // close modal
+  document.addEventListener('click', function(e){
+    const modal = document.getElementById('price-history-modal');
+    if (!modal) return;
+    if (e.target && e.target.id === 'price-history-close') {
+      modal.classList.add('hidden');
+      if(priceHistoryChart){ try{ priceHistoryChart.destroy(); }catch(e){} priceHistoryChart=null; }
+    }
+    if (e.target === modal) {
+      modal.classList.add('hidden');
+      if(priceHistoryChart){ try{ priceHistoryChart.destroy(); }catch(e){} priceHistoryChart=null; }
+    }
+  });
+})();
+</script>
+<!-- END INJECTED SCRIPTS -->
+
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons();</script>
+
+<script>
+// Helper to map categories to Lucide icons
+
+// getLucideIcon: first check categories (editable), then fallback to original map.
+function getLucideIcon(categoryName) {
+  try {
+    if (typeof categories !== 'undefined' && categories) {
+      // search main
+      if (Array.isArray(categories.main)) {
+        const main = categories.main.find(c=>c && c.name === categoryName);
+        if (main && main.icon) return main.icon;
+      }
+      // search sub
+      if (categories.sub && typeof categories.sub === 'object') {
+        for (const k in categories.sub) {
+          const arr = categories.sub[k];
+          if (!Array.isArray(arr)) continue;
+          const found = arr.find(c=>c && c.name === categoryName);
+          if (found && found.icon) return found.icon;
+        }
+      }
+      // search subsub
+      if (categories.subsub && typeof categories.subsub === 'object') {
+        for (const k in categories.subsub) {
+          const arr = categories.subsub[k];
+          if (!Array.isArray(arr)) continue;
+          const found = arr.find(c=>c && c.name === categoryName);
+          if (found && found.icon) return found.icon;
+        }
+      }
+    }
+  } catch(e) { console.warn('getLucideIcon error', e); }
+  // fallback map (original)
+  const originalMap = {" Arveja LA FLORESTA* sabor y calidad (500 gr)": "circle", " Bebida láctea YOX surtido sin azúcar x8und (760 ml)": "milk", " Garbanzo FRESCAMPO granos seleccionados (500 gr)": "bean", " Televisor SAMSUNG 65 pulgadas LED Uhd4K Smart TV UN65DU7000KXZL": "tv", "--": "circle", "Aceite de Oliva Extra Virgen 500ml": "bottle", "Aceites": "bottle", "Aceites Vegetales": "bottle", "Aceites de Coco": "bottle", "Aceites de Girasol": "bottle", "Aceites de Oliva": "bottle", "Aceites de Sésamo": "bottle", "Aderezos": "leaf", "Agua BRISA sin gas botellón (6000 ml)": "circle", "Agua con gas": "circle", "Agua sin gas": "circle", "Aguardiente amarillo de manzanares sin azúcar (750 ml)": "candy", "Aguardientes": "circle", "Aguas": "circle", "Aguas saborizadas": "circle", "Almacén": "package", "Almejas y Mejillones": "circle", "Arroz": "circle-dot", "Arroz Blanco": "circle-dot", "Arroz CARULLA blanco (5000 gr)": "circle-dot", "Arroz Especiales": "circle-dot", "Arroz Integral": "circle-dot", "Artesanal": "circle", "Artesanales": "circle", "Arvejas": "circle", "Audio y Video": "tv", "Azúcar": "candy", "Azúcar Blanca": "candy", "Azúcar Impalpable": "candy", "Azúcar MAYAGUEZ blanca (1000 gr)": "candy", "Azúcar Mascabo": "candy", "Azúcar Orgánica": "candy", "BABY BACK RIBS 940G": "circle", "Baguette": "circle", "Bananas": "circle", "Barras de Cereal": "circle", "Bebidas": "cup-soda", "Bife de Chorizo 1kg": "circle", "Blanqueadores": "circle", "CARNE MOLIDA de Cerdo 640G": "utensils-crossed", "CHORIZO PREMIUM X 640 GR": "circle", "COSTILLITAS AHUMADAS X 500 GR": "circle", "Café": "coffee", "Café CAFE QUINDIO gourmet tostado y molido (454 gr)": "coffee", "Café Instantaneo": "coffee", "Café Molido": "coffee", "Café en Grano": "coffee", "Calamar Baby Sepia 500 g": "circle", "Calamares y Pulpos": "circle", "Camarones y Langostinos": "circle", "Camarón 26/30 Cocido 500 g": "circle", "Carne Picada": "utensils-crossed", "Carne de cerdo": "utensils-crossed", "Carnes": "utensils-crossed", "Carnes Frias": "utensils-crossed", "Carnes Frias y Embutidos": "utensils-crossed", "Carnes de Cerdo": "utensils-crossed", "Carnes de Res": "utensils-crossed", "Carulla": "circle", "Celulares": "smartphone", "Cerveza Belgica Sixpack STELLA ARTOIS 1980 ml": "circle", "Cerveza X 6 LATA DORADA CLUB COLOMBIA 1980 ml": "circle", "Cervezas": "circle", "Clásicas": "circle", "Cola": "circle", "Comidas Preparadas": "circle", "Computadores e Informática": "laptop", "Conchitas": "circle", "Condimentos y Especias": "sprout", "Cortes Económicos": "circle", "Cortes Premium": "circle", "Costillas": "circle", "D1": "circle", "Desinfectantes": "circle", "Detergentes Líquidos": "circle", "Detergentes en Polvo": "circle", "Electrodomésticos del hogar": "monitor", "Embutidos": "circle", "Endulzantes": "circle", "Espaghettis": "circle", "Especial": "sprout", "Exóticas": "circle", "Facturas": "circle", "Fideos Cortos": "circle", "Filetes y Lomo": "circle", "Frescas": "circle", "Frijol DIANA cargamanto (500 gr)": "circle", "Frijoles": "circle", "Frutas": "apple", "Frutas Orgánicas": "apple", "Frutas de Estación": "apple", "Frutas y Verduras": "apple", "Frutos Secos": "circle", "Fugazzeta": "circle", "Galletitas": "circle", "Galletitas Saladas": "circle", "Garbanzos": "circle", "Gaseosa Coca Cola ZERO botella (1500 ml)": "cup-soda", "Gaseosas": "cup-soda", "Ginebra": "circle", "Golosinas": "circle", "Gourmet": "circle", "Granos": "bean", "Harina de trigo HAZ DE OROS tradicional (500 gr)": "sandwich", "Harinas": "sandwich", "Harinas de Arroz": "sandwich", "Harinas de Avena": "sandwich", "Harinas de Centeno": "sandwich", "Harinas de Maíz": "sandwich", "Harinas de Trigo": "sandwich", "Helados": "circle", "HiperMarFish": "circle", "Hortalizas": "circle", "Importadas": "circle", "Integral": "circle", "Iphone": "smartphone", "Jugos": "circle", "Jumbo": "circle", "Ketchups": "circle", "Kétchups": "circle", "La Fazenda": "circle", "Lavandería": "circle", "Leche Descremada y Semidescremada": "milk", "Leche Deslactosada": "milk", "Leche Entera": "milk", "Leche FRESCAMPO entera x6und (5400 ml)": "milk", "Leche en Polvo": "milk", "Leches": "milk", "Lenteja FRESCAMPO granos seleccionados (1000 gr)": "bean", "Lentejas": "circle", "Licores": "circle", "Light": "circle", "Limpieza": "sparkles", "Limpieza de Baño": "sparkles", "Limpieza de Cocina": "sparkles", "Limón": "circle", "Limón Tahití Malla TAEQ 1000 gr": "circle", "Lácteos": "milk", "Mantequillas y Margarinas": "circle", "Manzanas": "circle", "Mariscos": "fish", "Mayonesa Clásica": "circle", "Mayonesa Light": "circle", "Mayonesas": "circle", "Mostazas": "circle", "Muzzarella": "circle", "Nacionales": "circle", "Napolitana": "circle", "Naranja": "circle", "Olimpica": "sparkles", "Orgánicas": "circle", "Orgánicos": "circle", "Ostra Entera 1Und ": "circle", "Otras Pastas": "utensils", "Otros": "circle", "Otros Vinagres": "flask-conical", "Otros Yogures": "circle", "Pan de Molde": "sandwich", "Panadería": "sandwich", "Panes": "sandwich", "Papas Fritas": "circle", "Papeles": "circle", "Pastas": "utensils", "Pastas MONTICELLO spaghetti premium (500 gr)": "utensils", "Pastas Rellenas": "utensils", "Pechuga": "circle", "Pescados": "fish", "Pescados Enteros": "fish", "Pescados y Mariscos": "fish", "Pizzas": "circle", "Pollo": "drumstick", "Pollo Entero": "drumstick", "Pomelo": "circle", "Ponzu Vinagre de Frutas Mizkan (1800 ml)": "apple", "Postres Lácteos": "milk", "Premium": "circle", "Productos Sin TACC": "circle", "Queso Crema": "circle", "Queso Mozzarella": "circle", "Queso Nacionales, Campesinos y Semiduro": "circle", "Queso Parmesano": "circle", "Queso Parmesano ALPINA rallado (100 gr)": "circle", "Queso Pera": "circle", "Quesos": "circle", "Quesos Internacionales": "circle", "Quitamanchas": "circle", "Refrigeración y Lavado": "snowflake", "Ron": "circle", "Saborizadas": "circle", "Sal": "salt", "Sal Especiales": "sprout", "Sal Marina Dos Anclas 1kg": "circle", "Salsas": "circle", "Sierra en Posta Und x 1000 g ": "circle", "Sin Alcohol": "circle", "Sin Azúcar": "candy", "Sin TACC": "circle", "Snacks": "popcorn", "Suavizantes": "circle", "Tecnología y Electrodomésticos": "monitor", "Televisores": "circle", "Tostadas": "circle", "Usuario": "circle", "Vacío y Asado": "circle", "Vegetales": "circle", "Verduras": "apple", "Verduras Orgánicas": "apple", "Vinagre COLMANS blanco (1000 ml) ": "flask-conical", "Vinagre PIATTO balsámico agraz (330 gr)": "flask-conical", "Vinagre de manzana MANZATO  (500 ml)": "flask-conical", "Vinagres": "flask-conical", "Vinagres Balsámicos": "flask-conical", "Vinagres Blancos": "flask-conical", "Vinagres de Manzana y Sidra de Manzana": "flask-conical", "Vinagretas": "flask-conical", "Vinos": "circle", "Vodka": "circle", "Whisky": "circle", "Whisky GLENLIVET founders reserve single malt (700 ml)": "circle", "Yogures": "circle", "Yogures Griegos": "circle", "Yogures Naturales": "circle", "Yogurt griego DEJAMU entero natural (937 ml)": "circle", "Zapatoca": "circle", "Éxito": "circle"};
+  return originalMap[categoryName] || 'circle';
+}
+
+
+// Render categories into container using card-base and Lucide icons
+function renderCategories() {
+  const container = document.getElementById('main-categories-container');
+  if (!container) return;
+  container.innerHTML = '';
+  categories.main.forEach(cat => {
+    const div = document.createElement('div');
+    div.className = 'card-base categoria';
+    div.onclick = () => {
+      state.selectedCategory.main = cat.name;
+      showSubcategoriesPage();
+    };
+    div.innerHTML = '<i data-lucide="'+getLucideIcon(cat.name)+'" class="card-icon"></i>' +
+                    '<p class="card-text">'+cat.name+'</p>';
+    container.appendChild(div);
+  });
+  if (window.lucide && typeof lucide.createIcons === 'function') {
+    try { lucide.createIcons(); } catch(e) {}
+  }
+}
+
+// ====== FUNCIÓN GLOBAL PARA FORMATEAR PRECIOS ======
+function formatCOP(value) {
+    if (typeof value !== 'number') return value;
+    return value.toLocaleString('es-CO', {
+        style: 'currency',
+        currency: 'COP',
+        minimumFractionDigits: 0
+    });
+}
+
+// ====== FUNCIÓN INTERMEDIA PARA EVITAR PORCENTAJES ======
+function renderPrice(value) {
+    if (typeof value === 'string' && value.includes('%')) {
+        return value; // no formatear porcentajes
+    }
+    return formatCOP(value);
+}
+</script>
+
+
+
+<script>
+  function getTopProductsByAhorro(products, limit = 4) {
+    let allProducts = [];
+    for (const category in products) {
+      products[category].forEach(p => {
+        p.supermarkets.forEach(s => {
+          if (s.previousPrice && s.previousPrice > s.price) {
+            let ahorro = ((s.previousPrice - s.price) / s.previousPrice) * 100;
+            allProducts.push({
+              name: p.name,
+              image: p.image,
+              price: s.price,
+              previousPrice: s.previousPrice,
+              ahorro: ahorro.toFixed(1)
+            });
+          }
+        });
+      });
+    }
+    return allProducts.sort((a, b) => b.ahorro - a.ahorro).slice(0, limit);
+  }
+  document.addEventListener("DOMContentLoaded", () => {
+    const destacados = getTopProductsByAhorro(products, 4);
+    const destacadosList = document.getElementById("destacados-list");
+    destacados.forEach(prod => {
+      destacadosList.innerHTML += `
+        <div class="bg-white rounded-xl shadow p-4">
+          <img src="${prod.image}" alt="${prod.name}" class="w-full h-40 object-contain mb-2">
+          <h3 class="font-semibold text-sm mb-1">${prod.name}</h3>
+          <p class="text-green-600 font-bold">${renderPrice(prod.price)}</p>
+          <p class="text-gray-500 line-through text-sm">${renderPrice(prod.previousPrice)}</p>
+          <p class="text-red-500 text-sm font-bold">↓ ${prod.ahorro}%</p>
+        </div>
+      `;
+    });
+  });
+</script>
+
+
+
+
+<script>
+  // 🌐 URL del backend desplegado en Render
+  const API_URL = "https://pricezappbackendv2.onrender.com";
+
+  // ✅ Probar conexión automática al backend
+  async function checkBackendStatus() {
+    try {
+      const res = await fetch(API_URL);
+      if (res.ok) {
+        console.log("✅ Conexión exitosa con el backend Pricezapp");
+      } else {
+        console.warn("⚠️ El backend respondió, pero con error:", res.status);
+      }
+    } catch (err) {
+      console.error("❌ No se pudo conectar con el backend:", err);
+    }
+  }
+  checkBackendStatus();
+
+  // 🧑‍💻 Registro de usuario
+  async function registerUser(email, password) {
+    try {
+      const res = await fetch(`${API_URL}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        alert("✅ Registro exitoso");
+        console.log("Usuario creado:", data);
+      } else {
+        alert("❌ Error al registrar: " + (data.detail || "Desconocido"));
+      }
+    } catch (err) {
+      console.error("Error en registro:", err);
+    }
+  }
+
+  // 🔐 Inicio de sesión
+  async function loginUser(email, password) {
+    try {
+      const res = await fetch(`${API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.access_token) {
+        localStorage.setItem("token", data.access_token);
+        alert("✅ Sesión iniciada correctamente");
+      } else {
+        alert("❌ Credenciales inválidas");
+      }
+    } catch (err) {
+      console.error("Error al iniciar sesión:", err);
+    }
+  }
+
+  // 🚪 Cerrar sesión
+  function logoutUser() {
+    localStorage.removeItem("token");
+    alert("👋 Sesión cerrada");
+  }
+
+  // 💖 Agregar a favoritos (requiere login)
+  async function addFavorite(productId) {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("🔒 Inicia sesión primero.");
+
+    try {
+      const res = await fetch(`${API_URL}/favorites/`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ product_id: productId })
+      });
+
+      if (res.ok) alert("💖 Producto agregado a favoritos");
+      else alert("❌ Error al agregar favorito");
+    } catch (err) {
+      console.error("Error al agregar favorito:", err);
+    }
+  }
+
+  // 📦 Crear lista de productos
+  async function createList(name) {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("🔒 Inicia sesión primero.");
+
+    try {
+      const res = await fetch(`${API_URL}/lists/`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name })
+      });
+
+      if (res.ok) alert("🗂️ Lista creada con éxito");
+      else alert("❌ No se pudo crear la lista");
+    } catch (err) {
+      console.error("Error al crear lista:", err);
+    }
+  }
+
+  // 🔔 Crear alerta de precio
+  async function createPriceAlert(productId, targetPrice) {
+    const token = localStorage.getItem("token");
+    if (!token) return alert("🔒 Inicia sesión primero.");
+
+    try {
+      const res = await fetch(`${API_URL}/alerts/`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ product_id: productId, target_price: targetPrice })
+      });
+
+      if (res.ok) alert("🔔 Alerta de precio creada");
+      else alert("❌ No se pudo crear la alerta");
+    } catch (err) {
+      console.error("Error al crear alerta:", err);
+    }
+  }
+
+  // 🧭 Ejemplo de uso manual desde consola:
+  // registerUser("test@mail.com", "123456");
+  // loginUser("test@mail.com", "123456");
+  // addFavorite(1);
+  // createList("Mis Ofertas");
+  // createPriceAlert(5, 25000);
+
+</script>
+
+
+</body>
+</html>
