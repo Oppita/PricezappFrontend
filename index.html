@@ -3049,237 +3049,336 @@ function renderPrice(value) {
 
 
 <script>
-  const API_URL = "https://pricezappbackendv2.onrender.com";
+/* -------------------------
+  CONFIG
+------------------------- */
+const API_URL = "https://pricezappbackendv2.onrender.com";
 
-  // ✅ Probar conexión al backend al iniciar
-  async function checkBackendStatus() {
-    try {
-      const res = await fetch(API_URL);
-      if (res.ok) {
-        console.log("✅ Conexión exitosa con el backend Pricezapp");
-      } else {
-        console.warn("⚠️ El backend respondió con error:", res.status);
-      }
-    } catch (err) {
-      console.error("❌ No se pudo conectar con el backend:", err);
+const API_CONFIG = {
+  getToken() { return localStorage.getItem('pricezapp_token'); },
+  setToken(t) { if (t) localStorage.setItem('pricezapp_token', t); },
+  clearToken() { localStorage.removeItem('pricezapp_token'); },
+  getUser() { try { return JSON.parse(localStorage.getItem('pricezapp_user')); } catch(e){ return null } },
+  setUser(u) { if (u) localStorage.setItem('pricezapp_user', JSON.stringify(u)); },
+  clearUser() { localStorage.removeItem('pricezapp_user'); }
+};
+
+/* -------------------------
+  UTIL: notificaciones simples
+------------------------- */
+function showNotification(msg, timeout=3500){
+  try {
+    const container = document.getElementById('notification');
+    const span = document.getElementById('notification-message');
+    if(!container || !span) {
+      // fallback: alert
+      console.log('NOTIF:', msg);
+      return;
     }
+    span.textContent = msg;
+    container.classList.remove('hidden');
+    container.style.display = 'block';
+    clearTimeout(container._hideTimer);
+    container._hideTimer = setTimeout(()=> {
+      container.classList.add('hidden');
+      container.style.display = 'none';
+    }, timeout);
+  } catch(e){ console.log('showNotification error', e) }
+}
+
+/* -------------------------
+  HELPER: llamadas fetch con token + manejo 401
+------------------------- */
+async function apiCall(endpoint, options = {}) {
+  const url = API_URL + endpoint;
+  const token = API_CONFIG.getToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
+  const opts = {...options, headers};
+  try {
+    const res = await fetch(url, opts);
+    // Si recibimos 401 -> desloguear localmente
+    if (res.status === 401) {
+      API.logout();
+      throw new Error('No autorizado (token inválido o expirado).');
+    }
+    // Para respuestas sin body (204) devolver null
+    if (res.status === 204) return null;
+    // Intentar parsear JSON
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : null;
+    if (!res.ok) {
+      const detail = data?.detail || data?.message || res.statusText || 'Error API';
+      const err = new Error(detail);
+      err.response = data;
+      throw err;
+    }
+    return data;
+  } catch (err) {
+    // Pasar mensaje legible
+    if (err.name === 'SyntaxError') throw new Error('Respuesta inválida del servidor.');
+    throw err;
   }
-  checkBackendStatus();
+}
 
-  // -----------------------------------------------------------
-  // 🔐 REGISTRO DE USUARIO
-  // -----------------------------------------------------------
-  async function handleRegister(event) {
-    event.preventDefault();
+/* -------------------------
+  API: métodos que usa el frontend
+------------------------- */
+const API = {
+  register: (name, email, password) =>
+    apiCall('/auth/register', { method: 'POST', body: JSON.stringify({ name, email, password }) }),
 
-    const form = event.target;
-    const name = form.name.value.trim();
-    const email = form.email.value.trim();
-    const password = form.password.value.trim();
+  login: async (email, password) => {
+    const data = await apiCall('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    if (!data?.access_token) throw new Error('No se recibió token del servidor');
+    API_CONFIG.setToken(data.access_token);
+    return data;
+  },
 
+  getCurrentUser: () => apiCall('/auth/me', { method: 'GET' }),
+
+  logout: () => {
+    API_CONFIG.clearToken();
+    API_CONFIG.clearUser();
+  },
+
+  // products & categories
+  getProducts: (q='') => apiCall(q ? `/products?q=${encodeURIComponent(q)}` : '/products'),
+  getProductById: (id) => apiCall(`/products/${id}`),
+  getCategories: () => apiCall('/products/categories'),
+
+  // favorites
+  toggleFavorite: (productId) => apiCall(`/favorites/toggle?product_id=${productId}`, { method: 'POST' }),
+  getFavorites: () => apiCall('/favorites'),
+
+  // lists
+  createList: (name, items=[]) => apiCall('/lists/', { method: 'POST', body: JSON.stringify({ name, items }) }),
+  getLists: () => apiCall('/lists'),
+  updateList: (id, name, items) => apiCall(`/lists/${id}`, { method: 'PUT', body: JSON.stringify({ name, items }) }),
+  deleteList: (id) => apiCall(`/lists/${id}`, { method: 'DELETE' }),
+
+  // alerts
+  createAlert: (product_id, target_price) => apiCall('/alerts/', { method: 'POST', body: JSON.stringify({ product_id, target_price }) }),
+  getAlerts: () => apiCall('/alerts'),
+  deleteAlert: (id) => apiCall(`/alerts/${id}`, { method: 'DELETE' })
+};
+
+/* -------------------------
+  HANDLERS: formularios (las forms YA llaman a estas funciones desde HTML)
+------------------------- */
+async function handleRegister(event){
+  try {
+    if(event && event.preventDefault) event.preventDefault();
+    // Obtener campos del form (soportar form directo o inputs por name)
+    const form = event?.target || document.querySelector('#register-page form');
+    const name = form?.querySelector('input[name="name"]')?.value?.trim();
+    const email = form?.querySelector('input[name="email"]')?.value?.trim();
+    const password = form?.querySelector('input[name="password"]')?.value;
+    if (!name || !email || !password) {
+      showNotification('Completa todos los campos');
+      return;
+    }
+    await API.register(name, email, password);
+    showNotification('Usuario creado. Por favor inicia sesión.');
+    // Intentar llevar a login si existe la función en tu frontend
+    if (typeof showLoginPage === 'function') showLoginPage();
+    else console.log('Registro OK - muestra la página de login manualmente');
+  } catch (err) {
+    console.error('handleRegister', err);
+    showNotification('Error registro: ' + (err.message || err));
+  }
+}
+
+async function handleLogin(event){
+  try {
+    if(event && event.preventDefault) event.preventDefault();
+    const form = event?.target || document.querySelector('#login-page form');
+    const email = form?.querySelector('input[name="email"]')?.value?.trim();
+    const password = form?.querySelector('input[name="password"]')?.value;
     if (!email || !password) {
-      alert("Por favor completa todos los campos.");
+      showNotification('Ingresa email y contraseña');
       return;
     }
-
-    try {
-      const res = await fetch(`${API_URL}/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("✅ Registro exitoso. Ahora puedes iniciar sesión.");
-        showLoginPage();
-      } else {
-        alert("❌ Error al registrar: " + (data.detail || "Intenta con otro correo."));
-      }
-    } catch (err) {
-      console.error("Error en registro:", err);
-      alert("⚠️ No se pudo conectar con el servidor.");
-    }
-  }
-
-  // -----------------------------------------------------------
-  // 🔑 INICIO DE SESIÓN
-  // -----------------------------------------------------------
-  async function handleLogin(event) {
-    event.preventDefault();
-
-    const form = event.target;
-    const email = form.email.value.trim();
-    const password = form.password.value.trim();
-
-    if (!email || !password) {
-      alert("Por favor completa todos los campos.");
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.access_token) {
-        localStorage.setItem("token", data.access_token);
-        alert("✅ Sesión iniciada correctamente.");
-        state.isLoggedIn = true;
-        showCategoriesPage();
-      } else {
-        alert("❌ Credenciales inválidas. Verifica tu correo o contraseña.");
-      }
-    } catch (err) {
-      console.error("Error al iniciar sesión:", err);
-      alert("⚠️ No se pudo conectar con el servidor.");
-    }
-  }
-
-  // -----------------------------------------------------------
-  // 🚪 CERRAR SESIÓN
-  // -----------------------------------------------------------
-  function logout() {
-    localStorage.removeItem("token");
-    state.isLoggedIn = false;
-    alert("👋 Sesión cerrada correctamente.");
-    showLandingPage();
-  }
-
-  // -----------------------------------------------------------
-  // 💾 FAVORITOS (requiere login)
-  // -----------------------------------------------------------
-  async function addFavorite(productId) {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("🔒 Inicia sesión primero.");
-      showLoginPage();
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API_URL}/favorites/`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ product_id: productId }),
-      });
-
-      if (res.ok) alert("💖 Producto agregado a favoritos");
-      else alert("❌ Error al agregar favorito");
-    } catch (err) {
-      console.error("Error al agregar favorito:", err);
-    }
-  }
-
-  // -----------------------------------------------------------
-  // 🗂️ CREAR LISTA DE COMPRAS
-  // -----------------------------------------------------------
-  async function createListFromModal() {
-    const token = localStorage.getItem("token");
-    if (!token) return alert("🔒 Inicia sesión primero.");
-
-    const name = document.getElementById("new-list-name").value.trim();
-    if (!name) return alert("Por favor escribe un nombre.");
-
-    try {
-      const res = await fetch(`${API_URL}/lists/`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name }),
-      });
-
-      if (res.ok) {
-        alert("🗂️ Lista creada con éxito.");
-        closeListModal();
-      } else {
-        alert("❌ No se pudo crear la lista.");
-      }
-    } catch (err) {
-      console.error("Error al crear lista:", err);
-    }
-  }
-
-  // -----------------------------------------------------------
-  // 🔔 ALERTAS DE PRECIO
-  // -----------------------------------------------------------
-  async function createPriceAlert(productId, targetPrice) {
-    const token = localStorage.getItem("token");
-    if (!token) return alert("🔒 Inicia sesión primero.");
-
-    try {
-      const res = await fetch(`${API_URL}/alerts/`, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ product_id: productId, target_price: targetPrice }),
-      });
-
-      if (res.ok) alert("🔔 Alerta de precio creada correctamente.");
-      else alert("❌ No se pudo crear la alerta.");
-    } catch (err) {
-      console.error("Error al crear alerta:", err);
-    }
-  }
-
-  // -----------------------------------------------------------
-  // 👁️‍🗨️ FUNCIONES DE PÁGINAS (NAVEGACIÓN)
-  // -----------------------------------------------------------
-  function showLandingPage() {
-    hideAllPages();
-    document.getElementById("landing-page").classList.remove("hidden");
-  }
-
-  function showRegisterPage() {
-    hideAllPages();
-    document.getElementById("register-page").classList.remove("hidden");
-  }
-
-  function showLoginPage() {
-    hideAllPages();
-    document.getElementById("login-page").classList.remove("hidden");
-  }
-
-  function showCategoriesPage() {
-    hideAllPages();
-    document.getElementById("categories-page").classList.remove("hidden");
-  }
-
-  function hideAllPages() {
-    document.querySelectorAll("[id$='-page']").forEach((p) => p.classList.add("hidden"));
-  }
-
-  // -----------------------------------------------------------
-  // 🧭 INICIALIZACIÓN
-  // -----------------------------------------------------------
-  document.addEventListener("DOMContentLoaded", () => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      console.log("🔐 Sesión detectada. Cargando categorías...");
+    const data = await API.login(email, password);
+    // Obtener info de usuario desde /auth/me para guardar en localStorage
+    let user = null;
+    try { user = await API.getCurrentUser(); } catch(e) { console.warn('getCurrentUser failed', e) }
+    if (user) API_CONFIG.setUser(user);
+    showNotification('¡Sesión iniciada!');
+    // Establecer estado en global `state` si existe
+    if (window.state) {
       state.isLoggedIn = true;
-      showCategoriesPage();
-    } else {
-      showLandingPage();
+      state.user = user || null;
     }
-  });
+    // Cargar datos del usuario si existe la función
+    if (typeof loadUserData === 'function') {
+      try { await loadUserData(); } catch(e){ console.warn('loadUserData err', e) }
+    }
+    // Mostrar categorías (o la función equivalente que tengas)
+    if (typeof showCategoriesPage === 'function') showCategoriesPage();
+  } catch (err) {
+    console.error('handleLogin err', err);
+    showNotification('Credenciales inválidas');
+  }
+}
+
+function logout(){
+  API.logout();
+  if (window.state) {
+    state.isLoggedIn = false;
+    state.user = null;
+    state.favorites = [];
+    state.shoppingLists = [];
+    state.priceAlerts = [];
+  }
+  showNotification('Sesión cerrada');
+  if (typeof showLandingPage === 'function') showLandingPage();
+}
+
+/* -------------------------
+  CARGAR DATOS DEL USUARIO: favoritos, listas, alertas
+  (se usa al iniciar sesión y al recargar si token existe)
+------------------------- */
+async function loadUserData(){
+  try {
+    if (!API_CONFIG.getToken()) return;
+    if (!window.state) window.state = {};
+    // favoritos
+    try {
+      const favs = await API.getFavorites();
+      state.favorites = Array.isArray(favs) ? favs : [];
+    } catch(e) { console.warn('getFavorites failed', e); state.favorites = [] }
+
+    // listas
+    try {
+      const lists = await API.getLists();
+      state.shoppingLists = Array.isArray(lists) ? lists.map(l=>{
+        return { id: l.id, name: l.name, items: l.items || [] };
+      }) : [];
+    } catch(e) { console.warn('getLists failed', e); state.shoppingLists = [] }
+
+    // alertas
+    try {
+      const alerts = await API.getAlerts();
+      state.priceAlerts = Array.isArray(alerts) ? alerts : [];
+    } catch(e) { console.warn('getAlerts failed', e); state.priceAlerts = [] }
+
+    // actualizar badge si existe
+    try {
+      const badge = document.getElementById('alerts-badge');
+      if (badge) {
+        const n = state.priceAlerts?.length || 0;
+        if (n>0) { badge.textContent = n; badge.classList.remove('hidden'); badge.style.display='flex'; }
+        else { badge.classList.add('hidden'); badge.style.display='none'; }
+      }
+    } catch(e){}
+  } catch (err){
+    console.error('loadUserData', err);
+    // si token inválido eliminarlo
+    API.logout();
+  }
+}
+
+/* -------------------------
+  Funciones auxiliares utilizadas por el frontend (no rompen nada si ya existen)
+------------------------- */
+// Safe DOM helpers to avoid "cannot read property of null" errors
+function safeById(id){ return document.getElementById(id) || null; }
+function safeSetInner(id, html){ const el = safeById(id); if (el) el.innerHTML = html; }
+
+/* -------------------------
+  Auto-init: al cargar la página
+------------------------- */
+window.addEventListener('DOMContentLoaded', async () => {
+  // Reemplazar íconos lucide si está cargado (si no, lo intentamos cargar)
+  try {
+    if (typeof lucide === 'undefined') {
+      const s = document.createElement('script');
+      s.src = 'https://cdn.jsdelivr.net/npm/lucide@latest/dist/lucide.min.js';
+      s.defer = true;
+      s.onload = () => { try { lucide.replace(); } catch(e){} };
+      document.head.appendChild(s);
+    } else {
+      lucide.replace();
+    }
+  } catch(e){ console.warn('lucide load error', e) }
+
+  // Proteger llamadas a getElementById en scripts que se ejecuten después
+  // (no hacemos cambios al resto del UI)
+
+  // Si ya hay token, validar y obtener user -> popular estado
+  const token = API_CONFIG.getToken();
+  const savedUser = API_CONFIG.getUser();
+  if (token) {
+    // intentar obtener /auth/me si no hay user guardado
+    if (!savedUser) {
+      try {
+        const user = await API.getCurrentUser();
+        if (user) API_CONFIG.setUser(user);
+        if (window.state) { state.isLoggedIn = !!user; state.user = user; }
+      } catch (e) {
+        console.warn('token invalid at startup', e);
+        API.logout();
+      }
+    } else {
+      if (window.state) { state.isLoggedIn = true; state.user = savedUser; }
+    }
+    // cargar datos del usuario
+    try { await loadUserData(); } catch(e){ console.warn('loadUserData startup failed', e) }
+  }
+
+  // Conectar formularios si no están ya conectados por attributes inline
+  // Register form
+  try {
+    const regForm = document.querySelector('#register-page form');
+    if (regForm && !regForm.__boundToHandle) {
+      regForm.addEventListener('submit', handleRegister);
+      regForm.__boundToHandle = true;
+    }
+  } catch(e){}
+
+  // Login form
+  try {
+    const loginForm = document.querySelector('#login-page form');
+    if (loginForm && !loginForm.__boundToHandle) {
+      loginForm.addEventListener('submit', handleLogin);
+      loginForm.__boundToHandle = true;
+    }
+  } catch(e){}
+
+  // Safe console success
+  console.log('✅ Conexión / inicialización del frontend con backend Pricezapp completa.');
+});
+
+/* -------------------------
+  Exponer algunas funciones globales para usar desde el HTML / consola
+  (no sobrescribimos si ya existen)
+------------------------- */
+if (typeof window.handleRegister === 'undefined') window.handleRegister = handleRegister;
+if (typeof window.handleLogin === 'undefined') window.handleLogin = handleLogin;
+if (typeof window.logout === 'undefined') window.logout = logout;
+if (typeof window.loadUserData === 'undefined') window.loadUserData = loadUserData;
+
+// Exponer API util desde consola para debug
+window.PricezappAPI = API;
+window.PricezappConfig = API_CONFIG;
+
+/* -------------------------
+  Nota final (útil para debug en consola)
+------------------------- */
+console.log('Pricezapp frontend helper loaded. API_URL=', API_URL);
 </script>
+
 
 
 
 </body>
 </html>
+
 
 
 
