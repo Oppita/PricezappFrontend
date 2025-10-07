@@ -3189,8 +3189,22 @@ function renderPrice(value) {
   // createPriceAlert(5, 25000);
 
 </script>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const backendUrl = "https://pricezappbackendv2.onrender.com";
+
+  try {
+    const res = await fetch(backendUrl);
+    const data = await res.json();
+    console.log("✅ Conexión exitosa con el backend Pricezapp:", data.message);
+  } catch (error) {
+    console.error("❌ Error conectando con el backend:", error);
+  }
+});
+</script>
 
 
 </body>
 </html>
+
 
