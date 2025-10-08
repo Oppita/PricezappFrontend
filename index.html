@@ -2925,7 +2925,22 @@ lucide.createIcons();
 <!-- END INJECTED SCRIPTS -->
 
 <script src="https://unpkg.com/lucide@latest"></script>
-<script>lucide.createIcons();</script>
+<script>
+  // Cargar Lucide de forma segura
+  if (typeof lucide !== 'undefined' && lucide.createIcons) {
+    lucide.createIcons();
+  } else {
+    // Cargar Lucide si no está disponible
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';
+    script.onload = () => {
+      if (lucide.createIcons) {
+        lucide.createIcons();
+      }
+    };
+    document.head.appendChild(script);
+  }
+</script>
 
 <script>
 // Helper to map categories to Lucide icons
@@ -3643,6 +3658,7 @@ console.log('Pricezapp frontend helper loaded. API_URL=', API_URL);
 
 </body>
 </html>
+
 
 
 
