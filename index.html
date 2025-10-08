@@ -3052,15 +3052,280 @@ function renderPrice(value) {
 /* -------------------------
   CONFIG
 ------------------------- */
-const API_URL = "https://pricezappbackendv2.onrender.com";
-
+/* ==================== CONFIGURACIÓN API CORREGIDA ==================== */
 const API_CONFIG = {
-  getToken() { return localStorage.getItem('pricezapp_token'); },
-  setToken(t) { if (t) localStorage.setItem('pricezapp_token', t); },
-  clearToken() { localStorage.removeItem('pricezapp_token'); },
-  getUser() { try { return JSON.parse(localStorage.getItem('pricezapp_user')); } catch(e){ return null } },
-  setUser(u) { if (u) localStorage.setItem('pricezapp_user', JSON.stringify(u)); },
-  clearUser() { localStorage.removeItem('pricezapp_user'); }
+  BASE_URL: "https://pricezappbackendv2.onrender.com",
+  
+  getToken() { 
+    return localStorage.getItem('pricezapp_token'); 
+  },
+  
+  setToken(token) { 
+    localStorage.setItem('pricezapp_token', token); 
+  },
+  
+  clearToken() { 
+    localStorage.removeItem('pricezapp_token'); 
+  },
+  
+  getUser() { 
+    try { 
+      return JSON.parse(localStorage.getItem('pricezapp_user')); 
+    } catch(e) { 
+      return null; 
+    } 
+  },
+  
+  setUser(user) { 
+    localStorage.setItem('pricezapp_user', JSON.stringify(user)); 
+  },
+  
+  clearUser() { 
+    localStorage.removeItem('pricezapp_user'); 
+  }
+};
+
+/* ==================== FUNCIONES API SIMPLIFICADAS ==================== */
+async function apiCall(endpoint, options = {}) {
+  const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+  const token = API_CONFIG.getToken();
+  
+  const headers = {
+    'Content-Type': 'application/json',
+    ...options.headers
+  };
+  
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  try {
+    console.log(`🔄 API Call: ${options.method || 'GET'} ${url}`);
+    const response = await fetch(url, {
+      ...options,
+      headers
+    });
+    
+    console.log(`📡 Response status: ${response.status} for ${url}`);
+    
+    // Si es 401, limpiamos el token
+    if (response.status === 401) {
+      API_CONFIG.clearToken();
+      API_CONFIG.clearUser();
+      throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.');
+    }
+    
+    // Si es 204 (sin contenido), retornamos null
+    if (response.status === 204) {
+      return null;
+    }
+    
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.detail || data.message || `Error ${response.status}`);
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('❌ API Error:', error);
+    throw error;
+  }
+}
+
+/* ==================== ENDPOINTS BÁSICOS ==================== */
+const API = {
+  // Auth endpoints
+  async register(userData) {
+    return apiCall('/auth/register', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    });
+  },
+  
+  async login(credentials) {
+    const data = await apiCall('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify(credentials)
+    });
+    
+    if (data && data.access_token) {
+      API_CONFIG.setToken(data.access_token);
+      console.log('✅ Token guardado:', data.access_token);
+      
+      // Intentar obtener información del usuario
+      try {
+        const user = await this.getCurrentUser();
+        API_CONFIG.setUser(user);
+        console.log('✅ Usuario guardado:', user);
+        return { user, token: data.access_token };
+      } catch (userError) {
+        console.warn('⚠️ No se pudo obtener información del usuario:', userError);
+        // Si no podemos obtener el usuario, creamos uno básico
+        const basicUser = { 
+          name: credentials.email.split('@')[0], 
+          email: credentials.email 
+        };
+        API_CONFIG.setUser(basicUser);
+        return { user: basicUser, token: data.access_token };
+      }
+    }
+    
+    return data;
+  },
+  
+  async getCurrentUser() {
+    return apiCall('/auth/me');
+  },
+  
+  logout() {
+    API_CONFIG.clearToken();
+    API_CONFIG.clearUser();
+    console.log('✅ Sesión cerrada');
+  }
+};
+
+/* ==================== HANDLERS CORREGIDOS ==================== */
+async function handleRegister(event) {
+  if (event) event.preventDefault();
+  
+  try {
+    console.log('🔄 Iniciando registro...');
+    
+    const form = event?.target || document.querySelector('#register-page form');
+    const name = form?.querySelector('input[name="name"]')?.value?.trim();
+    const email = form?.querySelector('input[name="email"]')?.value?.trim();
+    const password = form?.querySelector('input[name="password"]')?.value;
+    
+    if (!name || !email || !password) {
+      showNotification('❌ Por favor completa todos los campos');
+      return;
+    }
+    
+    console.log('📝 Datos registro:', { name, email, password: '***' });
+    
+    const result = await API.register({ name, email, password });
+    console.log('✅ Registro exitoso:', result);
+    
+    showNotification('✅ Registro exitoso. Ahora puedes iniciar sesión.');
+    
+    // Redirigir a login
+    if (typeof showLoginPage === 'function') {
+      showLoginPage();
+    }
+    
+  } catch (error) {
+    console.error('❌ Error en registro:', error);
+    showNotification(`❌ Error: ${error.message || 'No se pudo completar el registro'}`);
+  }
+}
+
+async function handleLogin(event) {
+  if (event) event.preventDefault();
+  
+  try {
+    console.log('🔄 Iniciando login...');
+    
+    const form = event?.target || document.querySelector('#login-page form');
+    const email = form?.querySelector('input[name="email"]')?.value?.trim();
+    const password = form?.querySelector('input[name="password"]')?.value;
+    
+    if (!email || !password) {
+      showNotification('❌ Por favor ingresa email y contraseña');
+      return;
+    }
+    
+    console.log('📝 Datos login:', { email, password: '***' });
+    
+    const result = await API.login({ email, password });
+    console.log('✅ Login exitoso:', result);
+    
+    // Actualizar estado global
+    if (window.state) {
+      state.isLoggedIn = true;
+      state.user = result.user || { name: email.split('@')[0], email };
+      console.log('✅ Estado actualizado:', state.user);
+    }
+    
+    showNotification(`✅ ¡Bienvenido ${result.user?.name || 'Usuario'}!`);
+    
+    // Redirigir a categorías
+    if (typeof showCategoriesPage === 'function') {
+      showCategoriesPage();
+    }
+    
+  } catch (error) {
+    console.error('❌ Error en login:', error);
+    showNotification(`❌ Error: ${error.message || 'Credenciales incorrectas'}`);
+  }
+}
+
+function logout() {
+  API.logout();
+  
+  if (window.state) {
+    state.isLoggedIn = false;
+    state.user = null;
+    state.favorites = [];
+    state.shoppingLists = [];
+    state.priceAlerts = [];
+  }
+  
+  showNotification('👋 Sesión cerrada');
+  
+  if (typeof showLandingPage === 'function') {
+    showLandingPage();
+  }
+}
+
+/* ==================== INICIALIZACIÓN SIMPLIFICADA ==================== */
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('🚀 PriceZapp Frontend Inicializado');
+  
+  // Verificar si hay sesión activa al cargar
+  const token = API_CONFIG.getToken();
+  const user = API_CONFIG.getUser();
+  
+  if (token && user) {
+    console.log('🔑 Sesión activa encontrada:', user);
+    if (window.state) {
+      state.isLoggedIn = true;
+      state.user = user;
+    }
+  } else {
+    console.log('🔒 No hay sesión activa');
+  }
+  
+  // Conectar formularios si no están conectados
+  setTimeout(() => {
+    try {
+      const regForm = document.querySelector('#register-page form');
+      if (regForm && !regForm.__boundToHandle) {
+        regForm.addEventListener('submit', handleRegister);
+        regForm.__boundToHandle = true;
+        console.log('✅ Formulario registro conectado');
+      }
+    } catch(e) { console.warn('❌ Error conectando registro:', e) }
+    
+    try {
+      const loginForm = document.querySelector('#login-page form');
+      if (loginForm && !loginForm.__boundToHandle) {
+        loginForm.addEventListener('submit', handleLogin);
+        loginForm.__boundToHandle = true;
+        console.log('✅ Formulario login conectado');
+      }
+    } catch(e) { console.warn('❌ Error conectando login:', e) }
+  }, 1000);
+  
+  console.log('✅ Frontend listo para usar');
+});
+
+// Exponer funciones globalmente
+window.handleRegister = handleRegister;
+window.handleLogin = handleLogin;
+window.logout = logout;
+window.API = API;
+window.API_CONFIG = API_CONFIG;
 };
 
 /* -------------------------
@@ -3378,6 +3643,7 @@ console.log('Pricezapp frontend helper loaded. API_URL=', API_URL);
 
 </body>
 </html>
+
 
 
 
